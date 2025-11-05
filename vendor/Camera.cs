@@ -105,5 +105,15 @@ namespace skystride.vendor
         {
             this.aspectRatio = _aspect_ratio;
         }
+
+        public void SetPosition(Vector3 newPosition)
+        {
+            this.position = newPosition;
+        }
+
+        public void AddPosition(Vector3 delta)
+        {
+            this.position += delta;
+        }
     }
 }
