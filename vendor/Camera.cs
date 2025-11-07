@@ -40,6 +40,8 @@ namespace skystride.vendor
         private Vector3 velocity; // current velocity
         private bool isGrounded = false; // grounded flag
 
+        private bool physicsEnabled = false; // toggle for physics vs free-fly
+
         public Camera(Vector3 _position, float _aspectRatio)
         {
             this.position = _position;
@@ -83,6 +85,24 @@ namespace skystride.vendor
         public void UpdatePhysics(KeyboardState current, KeyboardState previous, float dt)
         {
             if (dt <=0f) return;
+
+            // Free-fly mode (no gravity / physics constraints)
+            if (!physicsEnabled)
+            {
+                Vector3 dir = Vector3.Zero;
+                if (current.IsKeyDown(Key.W)) dir += front; // forward
+                if (current.IsKeyDown(Key.S)) dir -= front; // backward
+                if (current.IsKeyDown(Key.D)) dir += right; // right
+                if (current.IsKeyDown(Key.A)) dir -= right; // left
+                if (current.IsKeyDown(Key.Space)) dir += Vector3.UnitY; // up
+                if (current.IsKeyDown(Key.ShiftLeft) || current.IsKeyDown(Key.ShiftRight) || current.IsKeyDown(Key.ControlLeft) || current.IsKeyDown(Key.ControlRight)) dir -= Vector3.UnitY; // down
+                if (dir.LengthSquared >0f)
+                {
+                    dir.NormalizeFast();
+                    position += dir * moveSpeed * dt;
+                }
+                return; // skip physics section
+            }
 
             // planar movement basis
             Vector3 forward = front; forward.Y =0f; if (forward.LengthSquared >0f) forward.NormalizeFast();
