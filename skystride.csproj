@@ -56,6 +56,7 @@
     <Compile Include="shaders\Fog.cs" />
     <Compile Include="vendor\Camera.cs" />
     <Compile Include="vendor\Engine.cs" />
+    <Compile Include="vendor\Model.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

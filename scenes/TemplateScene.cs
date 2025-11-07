@@ -1,5 +1,6 @@
 ﻿using skystride.objects;
 using skystride.objects.templates;
+using skystride.vendor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,15 @@ namespace skystride.scenes
         Grid grid = new Grid();
         CheckboardTerrain terrain = new CheckboardTerrain();
         Cube cube = new Cube();
-        
+
+        private static readonly Model frog = new Model("C:/Users/catal/OneDrive/Documents/GitHub/skystride/assets/models/frog.obj");
+
         public void Render()
         {
             grid.Render();
             terrain.Render();
             cube.Render();
+            frog.Render(new OpenTK.Vector3(5f, 0.5f, 0), 0.4f, -90f, 0f);
         }
     }
 }

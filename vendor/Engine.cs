@@ -33,7 +33,7 @@ namespace skystride.vendor
             VSync = VSyncMode.On;
 
             Title = "Skystride Engine";
-            WindowState = WindowState.Maximized;
+            //WindowState = WindowState.Maximized;
         }
 
         // on load event
