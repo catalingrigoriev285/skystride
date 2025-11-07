@@ -15,7 +15,7 @@ namespace skystride.scenes
         CheckboardTerrain terrain = new CheckboardTerrain();
         Cube cube = new Cube();
 
-        private static readonly Model frog = new Model("/assets/models/frog.obj", "/assets/textures/frog.jpg");
+        private static readonly Model frog = new Model("/assets/models/frog.obj", "/assets/models/frog.jpg");
 
         public void Render()
         {
