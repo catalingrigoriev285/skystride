@@ -28,7 +28,7 @@ namespace skystride.vendor
 
         public Model(string path)
         {
-            this.SourcePath = path;
+            path = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName + path;
 
             try
             {
@@ -48,11 +48,13 @@ namespace skystride.vendor
                 }
 
                 Loaded = true;
+
                 Console.WriteLine($"Model loaded: {path} ({vertices.Count} vertices, {faces.Count} faces)");
             }
             catch
             {
                 Loaded = false;
+
                 Console.WriteLine($"Failed to load model: {path}");
             }
         }
@@ -88,12 +90,11 @@ namespace skystride.vendor
                             var v = parts[i];
                             var vparts = v.Split('/');
                             int vi = int.Parse(vparts[0], CultureInfo.InvariantCulture);
-                            if (vi < 0) vi = vertices.Count + vi + 1; // negative indices support
-                            idx.Add(vi - 1); // obj indices are 1-based
+                            if (vi < 0) vi = vertices.Count + vi + 1;
+                            idx.Add(vi - 1);
                         }
                         if (idx.Count >= 3)
                         {
-                            // triangulate polygon (fan)
                             for (int i = 1; i < idx.Count - 1; i++)
                             {
                                 faces.Add(new int[] { idx[0], idx[i], idx[i + 1] });
@@ -104,20 +105,20 @@ namespace skystride.vendor
             }
         }
 
-        public void Render(Vector3 position, float scale = 1f, float rotX = 0f, float rotY = 0f)
+        public void Render(Vector3 position, float scale = 1f, float rotX = 0f, float rotY = 0f, float rotZ = 0f)
         {
             if (!Loaded) return;
 
             GL.PushMatrix();
             GL.Translate(position);
 
-            // apply rotations: pitch (X) then yaw (Y)
             if (rotX != 0f) GL.Rotate(rotX, 1f, 0f, 0f);
             if (rotY != 0f) GL.Rotate(rotY, 0f, 1f, 0f);
+            if (rotZ != 0f) GL.Rotate(rotZ, 0f, 0f, 1f);
 
             if (scale != 1f) GL.Scale(scale, scale, scale);
 
-            GL.Color3(0.85f, 0.75f, 0.6f); // default wooden tint
+            GL.Color3(Color.MediumPurple);
 
             GL.Begin(PrimitiveType.Triangles);
             for (int i = 0; i < faces.Count; i++)
@@ -127,7 +128,6 @@ namespace skystride.vendor
                 Vector3 v1 = vertices[f[1]] - center;
                 Vector3 v2 = vertices[f[2]] - center;
 
-                // compute face normal
                 Vector3 n = Vector3.Cross(v1 - v0, v2 - v0);
                 if (n.LengthSquared > 0f) n.NormalizeFast();
                 GL.Normal3(n);

@@ -15,14 +15,14 @@ namespace skystride.scenes
         CheckboardTerrain terrain = new CheckboardTerrain();
         Cube cube = new Cube();
 
-        private static readonly Model frog = new Model("C:/Users/catal/OneDrive/Documents/GitHub/skystride/assets/models/frog.obj");
+        private static readonly Model frog = new Model("/assets/models/frog.obj");
 
         public void Render()
         {
             grid.Render();
             terrain.Render();
             cube.Render();
-            frog.Render(new OpenTK.Vector3(5f, 0.5f, 0), 0.4f, -90f, 0f);
+            frog.Render(new OpenTK.Vector3(5f, 0.7f, 0), 0.4f, -90f, 0f, -150f);
         }
     }
 }
