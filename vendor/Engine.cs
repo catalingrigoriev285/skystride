@@ -22,9 +22,7 @@ namespace skystride.vendor
 
         // main instances
         Camera camera;
-        private bool firstCameraMove = true;
         private bool isMouseCentered = false;
-        private Vector2 latestMousePosition;
 
         // shader instances
         private Fog fog;
@@ -88,6 +86,8 @@ namespace skystride.vendor
             {
                 CursorVisible = true;
                 this.isMouseCentered = false;
+
+                Exit();
             }
 
             if (currentMouseState.LeftButton == ButtonState.Pressed)
