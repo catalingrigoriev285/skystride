@@ -8,7 +8,7 @@ using System.IO;
 
 namespace skystride.objects.templates
 {
-    internal class Plane : ISceneEntity, ICollidable
+    internal class Plane : ISceneEntity
     {
         private Vector3 position; // Center position of plane
         private float width; // Size along X axis
@@ -16,9 +16,6 @@ namespace skystride.objects.templates
         private float height; // Size along Y axis (thickness); if <=0 a single quad is rendered
         private Color color;
         private Vector3 normal; // Surface normal used for lighting (top face normal)
-
-        // Collision toggle
-        public bool CollisionEnabled { get; set; } = true;
 
         // Texture fields
         private int textureHandle; //0 => no texture
@@ -63,20 +60,6 @@ namespace skystride.objects.templates
         public void SetNormal(Vector3 n)
         {
             if (n.LengthSquared >0f) this.normal = Vector3.Normalize(n);
-        }
-
-        // ICollidable implementation
-        public bool IsActive { get { return CollisionEnabled; } }
-
-        public BoundingBox GetBounds()
-        {
-            // Provide an AABB that encloses the rendered geometry
-            float hw = this.width *0.5f;
-            float hd = this.depth *0.5f;
-            float hh = this.height <=0f ?0.01f : this.height *0.5f; // slight thickness for flat planes
-            Vector3 min = new Vector3(position.X - hw, position.Y - hh, position.Z - hd);
-            Vector3 max = new Vector3(position.X + hw, position.Y + hh, position.Z + hd);
-            return new BoundingBox(min, max);
         }
 
         // Texture API

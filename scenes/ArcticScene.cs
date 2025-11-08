@@ -16,11 +16,11 @@ namespace skystride.scenes
         {
             AddEntity(new Grid());
 
-            Plane spawnPlane = new Plane(new Vector3(5f, 1f, 5f), 20f, 10f, 1f, Color.IndianRed, new Vector3(0f, 1f, 0f));
+            Plane spawnPlane = new Plane(new Vector3(0f, 0f, 0f), 20f, 10f, 1f, Color.IndianRed, new Vector3(0f, 1f, 0f));
             spawnPlane.SetTexture("assets/textures/survivor.png");
             AddEntity(spawnPlane);
 
-            Plane spawnPlane2 = new Plane(new Vector3(0f, 2f, 20f), 20f, 10f, 1f, Color.IndianRed, new Vector3(0f, 1f, 0f));
+            Plane spawnPlane2 = new Plane(new Vector3(0f, 0f, 20f), 20f, 10f, 1f, Color.IndianRed, new Vector3(0f, 1f, 0f));
             spawnPlane2.SetTexture("assets/textures/survivor.png");
             AddEntity(spawnPlane2);
         }
