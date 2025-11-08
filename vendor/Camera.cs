@@ -40,7 +40,7 @@ namespace skystride.vendor
         private Vector3 velocity; // current velocity
         private bool isGrounded = false; // grounded flag
 
-        private bool physicsEnabled = true; // toggle for physics vs free-fly
+        private bool physicsEnabled = false; // toggle for physics vs free-fly
 
         public Camera(Vector3 _position, float _aspectRatio)
         {
