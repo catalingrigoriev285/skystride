@@ -116,6 +116,9 @@ namespace skystride.vendor
 
             camera.UpdatePhysics(currentKeyboardState, previousKeyboardState, (float)e.Time);
 
+            // Collision & scene logic update
+            activeScene?.Update(camera, (float)e.Time);
+
             this.previousKeyboardState = this.currentKeyboardState;
             this.previousMouseState = this.currentMouseState;
         }

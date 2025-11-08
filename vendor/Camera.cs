@@ -32,7 +32,7 @@ namespace skystride.vendor
 
         // physics fields
         private float moveSpeed = 6.0f; // horizontal move speed (m/s)
-        private float jumpSpeed = 6.5f; // initial jump velocity
+        private float jumpSpeed = 9.5f; // initial jump velocity
         private float gravity = -18.0f; // gravity acceleration (m/s^2)
         private float groundY = 0.0f; // flat ground plane at Y=0
         private float damping = 8.0f; // air damping for horizontal velocity blending
@@ -40,7 +40,13 @@ namespace skystride.vendor
         private Vector3 velocity; // current velocity
         private bool isGrounded = false; // grounded flag
 
-        private bool physicsEnabled = false; // toggle for physics vs free-fly
+        private bool physicsEnabled = true; // toggle for physics vs free-fly
+
+        // expose eye height for collision resolution
+        public float EyeHeight { get { return eyeHeight; } }
+
+        // dynamic support surface top (feet Y). When set, camera will clamp to this top like grounded
+        private float? supportTopY = null;
 
         public Camera(Vector3 _position, float _aspectRatio)
         {
@@ -139,6 +145,8 @@ namespace skystride.vendor
             {
                 velocity.Y = jumpSpeed;
                 isGrounded = false;
+                // leaving support when jumping
+                supportTopY = null;
             }
 
             // gravity
@@ -148,8 +156,11 @@ namespace skystride.vendor
             Vector3 pos = position;
             pos += velocity * dt;
 
-            // ground collision
-            float minY = groundY + eyeHeight;
+            // dynamic surface support and ground plane
+            float minFeetY = groundY;
+            if (supportTopY.HasValue && supportTopY.Value > minFeetY)
+                minFeetY = supportTopY.Value;
+            float minY = minFeetY + eyeHeight;
             if (pos.Y <= minY)
             {
                 pos.Y = minY;
@@ -162,6 +173,25 @@ namespace skystride.vendor
             }
 
             position = pos;
+        }
+
+        // Called by scene collision system when landing on top of an object
+        public void LandOn(float surfaceTopY)
+        {
+            float targetY = surfaceTopY + eyeHeight;
+            if (position.Y < targetY)
+            {
+                position = new Vector3(position.X, targetY, position.Z);
+            }
+            if (velocity.Y <0f) velocity.Y =0f;
+            isGrounded = true;
+            supportTopY = surfaceTopY;
+        }
+
+        // Called by scene to maintain or clear the support surface while overlapping
+        public void SetSupportTop(float? surfaceTopY)
+        {
+            supportTopY = surfaceTopY;
         }
 
         private void UpdateVectors()
