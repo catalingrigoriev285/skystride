@@ -1,11 +1,12 @@
-﻿using System;
+﻿using OpenTK;
+using skystride.objects;
+using skystride.objects.templates;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK;
-using System.Drawing;
-using skystride.objects.templates;
 
 namespace skystride.scenes
 {
@@ -13,9 +14,11 @@ namespace skystride.scenes
     {
         public ArcticScene()
         {
-            var platformSpawn = new Plane(new Vector3(0f, 0f, 0f), 20f, 20f, 1f, Color.AntiqueWhite, new Vector3(0f, 1f, 0f));
-            AddEntity(platformSpawn);
             AddEntity(new Grid());
+
+            Plane spawnPlane = new Plane(new Vector3(0f, 0f, 0f), 20f, 10f, 1f, Color.IndianRed, new Vector3(0f, 1f, 0f));
+            spawnPlane.SetTexture("assets/textures/survivor.png");
+            AddEntity(spawnPlane);
         }
     }
 }

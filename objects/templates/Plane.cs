@@ -2,6 +2,9 @@
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 using skystride.scenes;
+using System;
+using System.Drawing.Imaging;
+using System.IO;
 
 namespace skystride.objects.templates
 {
@@ -13,6 +16,12 @@ namespace skystride.objects.templates
         private float height; // Size along Y axis (thickness); if <=0 a single quad is rendered
         private Color color;
         private Vector3 normal; // Surface normal used for lighting (top face normal)
+
+        // Texture fields
+        private int textureHandle; //0 => no texture
+        private bool textureEnabled; // if true and textureHandle !=0, render textured
+        private float texScaleU =1f; // tiling along local X or width on top/bottom
+        private float texScaleV =1f; // tiling along local Z or depth on top/bottom
 
         public Plane() : this(new Vector3(0f,0f,0f),1f,1f,1f, Color.LightGray, new Vector3(0f,1f,0f)) { }
 
@@ -28,6 +37,8 @@ namespace skystride.objects.templates
             this.height = height <0f ?0f : height; // negative height coerced to0 (flat)
             this.color = color;
             this.normal = normal.LengthSquared >0f ? Vector3.Normalize(normal) : new Vector3(0f,1f,0f);
+            this.textureHandle =0;
+            this.textureEnabled = false;
         }
 
         public void SetPosition(Vector3 pos) { this.position = pos; }
@@ -51,6 +62,78 @@ namespace skystride.objects.templates
             if (n.LengthSquared >0f) this.normal = Vector3.Normalize(n);
         }
 
+        // Texture API
+        public void SetTexture(string path)
+        {
+            // Deletes previous texture if any
+            if (this.textureHandle !=0)
+            {
+                try { GL.DeleteTexture(this.textureHandle); } catch { /* ignore */ }
+                this.textureHandle =0;
+            }
+
+            string baseDir = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName;
+            string candidate = path ?? string.Empty;
+            string fullPath;
+            if (Path.IsPathRooted(candidate))
+                fullPath = candidate;
+            else
+            {
+                var trimChars = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+                fullPath = Path.Combine(baseDir, candidate.TrimStart(trimChars));
+            }
+
+            if (!File.Exists(fullPath))
+            {
+                // keep texture disabled if not found
+                this.textureEnabled = false;
+                return;
+            }
+
+            try
+            {
+                int handle = GL.GenTexture();
+                GL.BindTexture(TextureTarget.Texture2D, handle);
+
+                using (var bmp = new Bitmap(fullPath))
+                {
+                    var rect = new Rectangle(0,0, bmp.Width, bmp.Height);
+                    var data = bmp.LockBits(rect, ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    GL.TexImage2D(TextureTarget.Texture2D,0, PixelInternalFormat.Rgba,
+                        data.Width, data.Height,0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+                        PixelType.UnsignedByte, data.Scan0);
+                    bmp.UnlockBits(data);
+                }
+
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+                GL.BindTexture(TextureTarget.Texture2D,0);
+
+                this.textureHandle = handle;
+                this.textureEnabled = true;
+            }
+            catch
+            {
+                this.textureHandle =0;
+                this.textureEnabled = false;
+            }
+        }
+
+        public void SetTextureEnabled(bool enabled)
+        {
+            this.textureEnabled = enabled && this.textureHandle !=0;
+        }
+
+        public void SetTextureScale(float u, float v)
+        {
+            this.texScaleU = u <=0f ?1f : u;
+            this.texScaleV = v <=0f ?1f : v;
+        }
+
         public void Render()
         {
             float hw = this.width *0.5f; // Half width
@@ -64,18 +147,44 @@ namespace skystride.objects.templates
             Vector3 top10 = new Vector3(px + hw, py + hh, pz - hd);
             Vector3 top11 = new Vector3(px + hw, py + hh, pz + hd);
 
-            GL.Color3(this.color);
+            bool useTexture = this.textureEnabled && this.textureHandle !=0;
+            if (useTexture)
+            {
+                GL.Enable(EnableCap.Texture2D);
+                GL.BindTexture(TextureTarget.Texture2D, this.textureHandle);
+                GL.Color3(1f,1f,1f); // avoid tint
+            }
+            else
+            {
+                GL.Color3(this.color);
+            }
+
             GL.Begin(PrimitiveType.Quads);
 
             if (this.height <=0f)
             {
                 // Flat single quad (legacy behavior)
                 GL.Normal3(this.normal);
-                GL.Vertex3(top00);
-                GL.Vertex3(top10);
-                GL.Vertex3(top11);
-                GL.Vertex3(top01);
+                if (useTexture)
+                {
+                    GL.TexCoord2(0f,0f); GL.Vertex3(top00);
+                    GL.TexCoord2(this.texScaleU,0f); GL.Vertex3(top10);
+                    GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
+                    GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top01);
+                }
+                else
+                {
+                    GL.Vertex3(top00);
+                    GL.Vertex3(top10);
+                    GL.Vertex3(top11);
+                    GL.Vertex3(top01);
+                }
                 GL.End();
+                if (useTexture)
+                {
+                    GL.BindTexture(TextureTarget.Texture2D,0);
+                    GL.Disable(EnableCap.Texture2D);
+                }
                 return;
             }
 
@@ -87,45 +196,113 @@ namespace skystride.objects.templates
 
             // Top face
             GL.Normal3(this.normal);
-            GL.Vertex3(top00);
-            GL.Vertex3(top10);
-            GL.Vertex3(top11);
-            GL.Vertex3(top01);
+            if (useTexture)
+            {
+                GL.TexCoord2(0f,0f); GL.Vertex3(top00);
+                GL.TexCoord2(this.texScaleU,0f); GL.Vertex3(top10);
+                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
+                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top01);
+            }
+            else
+            {
+                GL.Vertex3(top00);
+                GL.Vertex3(top10);
+                GL.Vertex3(top11);
+                GL.Vertex3(top01);
+            }
 
             // Bottom face (inverse normal)
             GL.Normal3(-this.normal);
-            GL.Vertex3(bottom10);
-            GL.Vertex3(bottom00);
-            GL.Vertex3(bottom01);
-            GL.Vertex3(bottom11);
+            if (useTexture)
+            {
+                GL.TexCoord2(this.texScaleU,0f); GL.Vertex3(bottom10);
+                GL.TexCoord2(0f,0f); GL.Vertex3(bottom00);
+                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(bottom01);
+                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(bottom11);
+            }
+            else
+            {
+                GL.Vertex3(bottom10);
+                GL.Vertex3(bottom00);
+                GL.Vertex3(bottom01);
+                GL.Vertex3(bottom11);
+            }
 
             // Sides (approximate normals using axis-aligned assumptions; for non Y-up normals lighting may be off)
             // +X side
             GL.Normal3(1f,0f,0f);
-            GL.Vertex3(top10);
-            GL.Vertex3(bottom10);
-            GL.Vertex3(bottom11);
-            GL.Vertex3(top11);
+            if (useTexture)
+            {
+                // u -> Z (depth), v -> Y (height)
+                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top10);
+                GL.TexCoord2(0f,0f); GL.Vertex3(bottom10);
+                GL.TexCoord2(this.texScaleU,0f); GL.Vertex3(bottom11);
+                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
+            }
+            else
+            {
+                GL.Vertex3(top10);
+                GL.Vertex3(bottom10);
+                GL.Vertex3(bottom11);
+                GL.Vertex3(top11);
+            }
             // -X side
             GL.Normal3(-1f,0f,0f);
-            GL.Vertex3(bottom00);
-            GL.Vertex3(top00);
-            GL.Vertex3(top01);
-            GL.Vertex3(bottom01);
+            if (useTexture)
+            {
+                GL.TexCoord2(0f,0f); GL.Vertex3(bottom00);
+                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top00);
+                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top01);
+                GL.TexCoord2(this.texScaleU,0f); GL.Vertex3(bottom01);
+            }
+            else
+            {
+                GL.Vertex3(bottom00);
+                GL.Vertex3(top00);
+                GL.Vertex3(top01);
+                GL.Vertex3(bottom01);
+            }
             // +Z side
             GL.Normal3(0f,0f,1f);
-            GL.Vertex3(top01);
-            GL.Vertex3(top11);
-            GL.Vertex3(bottom11);
-            GL.Vertex3(bottom01);
+            if (useTexture)
+            {
+                // u -> X (width), v -> Y (height)
+                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top01);
+                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
+                GL.TexCoord2(this.texScaleU,0f); GL.Vertex3(bottom11);
+                GL.TexCoord2(0f,0f); GL.Vertex3(bottom01);
+            }
+            else
+            {
+                GL.Vertex3(top01);
+                GL.Vertex3(top11);
+                GL.Vertex3(bottom11);
+                GL.Vertex3(bottom01);
+            }
             // -Z side
             GL.Normal3(0f,0f, -1f);
-            GL.Vertex3(top10);
-            GL.Vertex3(top00);
-            GL.Vertex3(bottom00);
-            GL.Vertex3(bottom10);
+            if (useTexture)
+            {
+                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top10);
+                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top00);
+                GL.TexCoord2(0f,0f); GL.Vertex3(bottom00);
+                GL.TexCoord2(this.texScaleU,0f); GL.Vertex3(bottom10);
+            }
+            else
+            {
+                GL.Vertex3(top10);
+                GL.Vertex3(top00);
+                GL.Vertex3(bottom00);
+                GL.Vertex3(bottom10);
+            }
 
             GL.End();
+
+            if (useTexture)
+            {
+                GL.BindTexture(TextureTarget.Texture2D,0);
+                GL.Disable(EnableCap.Texture2D);
+            }
         }
     }
 }
