@@ -42,7 +42,7 @@ namespace skystride.scenes
             AddEntity(pereteD);
 
             AddEntity(new ModelEntity(
-                new Model("/assets/models/tobjs.obj", "/assets/models/tobjs.png"),
+                new Model("/assets/models/copac1.obj", "/assets/models/copac1.png"),
                 new Vector3(5f, 0.7f, 0f), 3f, 0f, 0f, 0f));
 
             AddEntity(new Snow(count: 7500, areaSize: 120f, spawnHeight: 50f, groundY: 0f, minSpeed: 1.5f, maxSpeed: 4.5f));
