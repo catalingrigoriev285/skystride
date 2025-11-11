@@ -2,6 +2,7 @@
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 using skystride.scenes;
+using skystride.vendor.collision;
 
 namespace skystride.objects.templates
 {

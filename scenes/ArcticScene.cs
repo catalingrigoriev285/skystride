@@ -33,11 +33,9 @@ namespace skystride.scenes
                 new Model("/assets/models/copac1.obj", "/assets/models/copac1.png"),
                 new Vector3(-13f, 6f, 14f), 1f, 0f, 0f, 0f));
 
-            _iashik = new ModelEntity(
+            AddEntity(new ModelEntity(
                 new Model("/assets/models/iashik.obj", "/assets/models/iashik.jpg"),
-                new Vector3(-27f, -1f, 0f), 5f, 0f, 90f, -360f);
-
-            AddEntity(_iashik);
+                new Vector3(-27f, -1f, 0f), 5f, 0f, 90f, -360f));
 
             AddEntity(new ModelEntity(
                 new Model("/assets/models/iashik.obj", "/assets/models/iashik.jpg"),
@@ -52,15 +50,7 @@ namespace skystride.scenes
 
         public override void Update(float dt, Camera camera, KeyboardState currentKeyboard, KeyboardState previousKeyboard, MouseState currentMouse, MouseState previousMouse)
         {
-            var colliders = new List<AABB>();
-            if (_iashik != null)
-            {
-                Vector3 pos = _iashik.GetPosition();
-                Vector3 size = _iashik.GetSize();
-                colliders.Add(new AABB(pos, size));
-            }
-
-            camera.ResolveCollisions(colliders);
+            camera.ResolveCollisions(Colliders);
         }
     }
 }

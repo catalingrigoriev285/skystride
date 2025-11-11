@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Input;
 using skystride.vendor;
+using skystride.vendor.collision;
+using skystride.objects.templates;
 
 namespace skystride.scenes
 {
@@ -10,6 +12,9 @@ namespace skystride.scenes
     {
         // Unified list for all entities
         protected readonly List<ISceneEntity> Entities = new List<ISceneEntity>();
+        
+        // Global colliders accumulated automatically
+        protected readonly List<AABB> Colliders = new List<AABB>();
 
         protected sealed class ModelEntity : ISceneEntity, IDisposable
         {
@@ -34,12 +39,34 @@ namespace skystride.scenes
             }
         }
 
-        protected void AddEntity(ISceneEntity entity) => Entities.Add(entity);
+        protected void AddEntity(ISceneEntity entity)
+        {
+            Entities.Add(entity);
+
+            var modelEnt = entity as ModelEntity;
+            if (modelEnt != null)
+            {
+                var size = modelEnt.GetSize();
+                if (size != Vector3.Zero)
+                    Colliders.Add(new AABB(modelEnt.GetPosition(), size));
+                return;
+            }
+
+            var cube = entity as Cube;
+            if (cube != null)
+            {
+                float s = cube.GetSize();
+                Colliders.Add(new AABB(cube.GetPosition(), new Vector3(s, s, s)));
+                return;
+            }
+
+            // other entity types can be added here
+        }
 
         // Per-frame logic hook for scenes
         public virtual void Update(float dt, Camera camera, KeyboardState currentKeyboard, KeyboardState previousKeyboard, MouseState currentMouse, MouseState previousMouse)
         {
-            // 
+            // base scene does nothing
         }
 
         public virtual void Render()
