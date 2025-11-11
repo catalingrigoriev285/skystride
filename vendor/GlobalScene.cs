@@ -26,6 +26,8 @@ namespace skystride.scenes
                 if (_model != null && _model.Loaded)
                     _model.Render(_position, _scale, _rx, _ry, _rz);
             }
+            public Vector3 GetPosition() { return _position; }
+            public Vector3 GetSize() { return _model != null ? _model.BoundsSize * _scale : Vector3.Zero; }
             public void Dispose()
             {
                 try { _model?.Dispose(); } catch { }

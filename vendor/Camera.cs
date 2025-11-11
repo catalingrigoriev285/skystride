@@ -54,6 +54,7 @@ namespace skystride.vendor
 
         private float hitboxSize = 1f;
 
+        // turn physics on by default to allow standing/walking
         private bool physicsEnabled = true;
 
         public Camera(Vector3 _position, float _aspectRatio)
@@ -82,16 +83,109 @@ namespace skystride.vendor
         public void ResolveCollisions(IEnumerable<AABB> colliders)
         {
             if (colliders == null) return;
-            var camBox = Hitbox();
+
+            // Camera half-extents (based on Hitbox())
+            float halfX = this.hitboxSize * 0.5f; //0.5f
+            float halfY = 1.0f; // since hitbox Y size is2f
+            float halfZ = this.hitboxSize * 0.5f;
+
+            Vector3 p = this.position;
+
+            bool groundedThisFrame = false;
+
             foreach (var c in colliders)
             {
-                if (c != null && camBox.Intersects(c))
+                if (c == null) continue;
+
+                // compute current camera box and collider box using local p
+                Vector3 camMin = new Vector3(p.X - halfX, p.Y - halfY, p.Z - halfZ);
+                Vector3 camMax = new Vector3(p.X + halfX, p.Y + halfY, p.Z + halfZ);
+                Vector3 colMin = c.Min;
+                Vector3 colMax = c.Max;
+
+                // quick reject
+                if (camMax.X <= colMin.X || camMin.X >= colMax.X ||
+                    camMax.Y <= colMin.Y || camMin.Y >= colMax.Y ||
+                    camMax.Z <= colMin.Z || camMin.Z >= colMax.Z)
                 {
-                    // rollback to previous position
-                    this.position = this.previousPosition;
-                    return;
+                    continue;
+                }
+
+                // horizontal overlap
+                bool overlapX = camMax.X > colMin.X && camMin.X < colMax.X;
+                bool overlapZ = camMax.Z > colMin.Z && camMin.Z < colMax.Z;
+
+                //1) Vertical resolution (standing on top or hitting head)
+                if (overlapX && overlapZ)
+                {
+                    // coming from above -> land on top
+                    float prevBottom = previousPosition.Y - halfY;
+                    float prevTop = previousPosition.Y + halfY;
+
+                    if (prevBottom >= colMax.Y && camMin.Y < colMax.Y)
+                    {
+                        // stand on object
+                        p.Y = colMax.Y + halfY;
+                        if (velocity.Y < 0f) velocity.Y = 0f;
+                        groundedThisFrame = true;
+
+                        camMin.Y = p.Y - halfY;
+                        camMax.Y = p.Y + halfY;
+                        continue;
+                    }
+
+                    // coming from below -> bonk head
+                    if (prevTop <= colMin.Y && camMax.Y > colMin.Y)
+                    {
+                        p.Y = colMin.Y - halfY;
+                        if (velocity.Y > 0f) velocity.Y = 0f;
+                        camMin.Y = p.Y - halfY;
+                        camMax.Y = p.Y + halfY;
+                        continue;
+                    }
+                }
+
+                float penX = Math.Min(camMax.X - colMin.X, colMax.X - camMin.X);
+                float penZ = Math.Min(camMax.Z - colMin.Z, colMax.Z - camMin.Z);
+
+                if (penX < penZ)
+                {
+                    // resolve along X
+                    if (previousPosition.X <= colMin.X)
+                        p.X = colMin.X - halfX;
+                    else if (previousPosition.X >= colMax.X)
+                        p.X = colMax.X + halfX;
+                    else
+                    {
+                        // fallback by direction of smallest displacement
+                        if ((camMax.X - colMin.X) < (colMax.X - camMin.X))
+                            p.X = colMin.X - halfX;
+                        else
+                            p.X = colMax.X + halfX;
+                    }
+                }
+                else
+                {
+                    // resolve along Z
+                    if (previousPosition.Z <= colMin.Z)
+                        p.Z = colMin.Z - halfZ;
+                    else if (previousPosition.Z >= colMax.Z)
+                        p.Z = colMax.Z + halfZ;
+                    else
+                    {
+                        if ((camMax.Z - colMin.Z) < (colMax.Z - camMin.Z))
+                            p.Z = colMin.Z - halfZ;
+                        else
+                            p.Z = colMax.Z + halfZ;
+                    }
                 }
             }
+
+            if (groundedThisFrame)
+            {
+                isGrounded = true;
+            }
+            this.position = p;
         }
 
         // Mouse look
@@ -121,6 +215,7 @@ namespace skystride.vendor
         {
             if (dt <= 0f) return;
 
+            // store previous position for collision rollback/resolution
             this.previousPosition = this.position;
 
             // Free-fly mode (no gravity / physics constraints)
@@ -214,7 +309,7 @@ namespace skystride.vendor
             Vector3 pos = position;
             pos += velocity * dt;
 
-            // ground collision
+            // ground plane clamp (fallback if not on top of any collider)
             float minY = groundY + eyeHeight;
             if (pos.Y <= minY)
             {

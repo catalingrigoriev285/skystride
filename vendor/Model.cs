@@ -25,6 +25,8 @@ namespace skystride.vendor
         public Vector3 Center { get { return center; } }
         public float BBoxHeight { get { return size.Y; } }
 
+        public Vector3 BoundsSize { get { return size; } }
+
         private int textureHandle;
         private string detectedTexturePath;
         private bool hasTexcoords;
