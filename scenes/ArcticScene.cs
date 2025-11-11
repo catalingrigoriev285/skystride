@@ -17,6 +17,7 @@ namespace skystride.scenes
     internal class ArcticScene : GlobalScene
     {
         private ModelEntity _iashik;
+        private Skybox _sky;
 
         public ArcticScene()
         {
@@ -24,6 +25,9 @@ namespace skystride.scenes
             platform.SetTexture("assets/textures/snow.png");
             platform.SetTextureScale(5, 5);
             AddEntity(platform);
+
+            _sky = new Skybox("assets/textures/skybox.jpg", 400f);
+            _sky.SetPosition(new Vector3(0f, 20f, 0f));
 
             AddEntity(new ModelEntity(
                 new Model("/assets/models/copac1.obj", "/assets/models/copac1.png"),
@@ -57,7 +61,7 @@ namespace skystride.scenes
                 new Model("/assets/models/iashik.obj", "/assets/models/iashik.jpg"),
                 new Vector3(-67f, -2f, 2f), 5f, 0f, 90f, -360f));
 
-            AddEntity(new Snow(count: 7500, areaSize: 120f, spawnHeight: 50f, groundY: 0f, minSpeed: 1.5f, maxSpeed: 4.5f));
+            AddEntity(new Snow(count: 7500, areaSize: 120f, spawnHeight: 50f, groundY: -10f, minSpeed: 1.5f, maxSpeed: 4.5f));
         }
 
         public override void Update(float dt, Camera camera, KeyboardState currentKeyboard, KeyboardState previousKeyboard, MouseState currentMouse, MouseState previousMouse)
@@ -68,6 +72,12 @@ namespace skystride.scenes
             }
 
             camera.ResolveCollisions(Colliders);
+        }
+
+        public override void Render()
+        {
+            if (_sky != null) _sky.Render();
+            base.Render();
         }
     }
 }
