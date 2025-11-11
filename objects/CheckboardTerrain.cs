@@ -24,6 +24,16 @@ namespace skystride.objects
             this.darkColor = Color.FromArgb(180, 180, 180);
         }
 
+        public float GetSize()
+        {
+            return this.size * this.tiles;
+        }
+
+        public Vector3 GetPosition()
+        {
+            return new Vector3(0, this.coord_y, 0);
+        }
+
         public void Render()
         {
             GL.Begin(PrimitiveType.Quads);

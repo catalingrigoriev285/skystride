@@ -1,10 +1,11 @@
-using System;
-using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Input;
+using skystride.objects;
+using skystride.objects.templates;
 using skystride.vendor;
 using skystride.vendor.collision;
-using skystride.objects.templates;
+using System;
+using System.Collections.Generic;
 
 namespace skystride.scenes
 {
@@ -55,8 +56,8 @@ namespace skystride.scenes
             var cube = entity as Cube;
             if (cube != null)
             {
-                float s = cube.GetSize();
-                Colliders.Add(new AABB(cube.GetPosition(), new Vector3(s, s, s)));
+                float size = cube.GetSize();
+                Colliders.Add(new AABB(cube.GetPosition(), new Vector3(size, size, size)));
                 return;
             }
 
@@ -66,6 +67,17 @@ namespace skystride.scenes
                 var size = plane.GetSize();
                 if (size != Vector3.Zero)
                     Colliders.Add(new AABB(plane.GetPosition(), size));
+                return;
+            }
+
+            var checkboardTerrain = entity as CheckboardTerrain;
+            if(checkboardTerrain != null)
+            {
+                // Only add a single thin ground collider covering full rendered span.
+                float halfSpan = checkboardTerrain.GetSize(); // tiles * tileSize (half span)
+                float fullSpan = halfSpan *2f; // cover -tiles .. +tiles
+                const float groundThickness =0.2f; // thin collision layer
+                Colliders.Add(new AABB(checkboardTerrain.GetPosition(), new Vector3(fullSpan, groundThickness, fullSpan)));
                 return;
             }
 

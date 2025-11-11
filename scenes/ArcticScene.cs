@@ -26,7 +26,7 @@ namespace skystride.scenes
             platform.SetTextureScale(5, 5);
             AddEntity(platform);
 
-            _sky = new Skybox("assets/textures/skybox.jpg", 400f);
+            _sky = new Skybox("assets/textures/skybox_arctic.jpg", 400f);
             _sky.SetPosition(new Vector3(0f, 20f, 0f));
 
             AddEntity(new ModelEntity(

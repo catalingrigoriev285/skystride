@@ -14,7 +14,8 @@ namespace skystride.scenes
 {
     internal class TemplateScene : GlobalScene
     {
-        private Cube _cube; // Keep reference for logic
+        private Cube _cube;
+        private Skybox _sky;
 
         public TemplateScene()
         {
@@ -23,6 +24,9 @@ namespace skystride.scenes
             AddEntity(new CheckboardTerrain());
             _cube = new Cube();
             AddEntity(_cube);
+
+            _sky = new Skybox("assets/textures/skybox_forest.jpg", 400f);
+            _sky.SetPosition(new Vector3(0f, 20f, 0f));
 
             // models use ModelEntity wrapper to carry transform
             AddEntity(new ModelEntity(
@@ -46,13 +50,16 @@ namespace skystride.scenes
             if (_cube != null && camera != null)
             {
                 // debug log
-                testAABB(camera, _cube);
+                //testAABB(camera, _cube);
 
-                var colliders = new List<AABB>();
-                colliders.Add(new AABB(_cube.GetPosition(), new Vector3(_cube.GetSize(), _cube.GetSize(), _cube.GetSize())));
-
-                camera.ResolveCollisions(colliders);
+                camera.ResolveCollisions(Colliders);
             }
+        }
+
+        public override void Render()
+        {
+            if (_sky != null) _sky.Render();
+            base.Render();
         }
     }
 }
