@@ -83,6 +83,7 @@ namespace skystride.vendor
         public void ResolveCollisions(IEnumerable<AABB> colliders)
         {
             if (colliders == null) return;
+            if(physicsEnabled == false) return;
 
             // Camera half-extents (based on Hitbox())
             float halfX = this.hitboxSize * 0.5f; //0.5f
