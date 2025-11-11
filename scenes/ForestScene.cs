@@ -17,11 +17,15 @@ namespace skystride.scenes
     internal class ForestScene : GlobalScene
     {
         private Skybox _sky;
+        private Rain _rain;
 
         public ForestScene()
         {
             _sky = new Skybox("assets/textures/skybox/forest.jpg", 400f);
             _sky.SetPosition(new Vector3(0f, 20f, 0f));
+
+            _rain = new Rain(count: 2000, areaSize: 120f, spawnHeight: 50f, groundY: -10f, minSpeed: 12f, maxSpeed: 24f);
+            AddEntity(_rain);
 
             //AddEntity(new Snow(count: 7500, areaSize: 120f, spawnHeight: 50f, groundY: -10f, minSpeed: 1.5f, maxSpeed: 4.5f));
         }
