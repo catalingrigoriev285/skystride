@@ -45,7 +45,13 @@ namespace skystride.scenes
         {
             if (_cube != null && camera != null)
             {
+                // debug log
                 testAABB(camera, _cube);
+
+                var colliders = new List<AABB>();
+                colliders.Add(new AABB(_cube.GetPosition(), new Vector3(_cube.GetSize(), _cube.GetSize(), _cube.GetSize())));
+
+                camera.ResolveCollisions(colliders);
             }
         }
     }

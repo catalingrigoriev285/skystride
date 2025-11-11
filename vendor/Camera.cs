@@ -18,6 +18,9 @@ namespace skystride.vendor
         public Vector3 up { get; private set; } = Vector3.UnitY;
         public Vector3 right { get; private set; } = Vector3.UnitX;
 
+        // previous frame position (for collision rollback)
+        private Vector3 previousPosition;
+
         // euler rotations
         private float yaw = -90.0f;
         private float pitch = 0.0f;
@@ -51,11 +54,12 @@ namespace skystride.vendor
 
         private float hitboxSize = 1f;
 
-        private bool physicsEnabled = false;
+        private bool physicsEnabled = true;
 
         public Camera(Vector3 _position, float _aspectRatio)
         {
             this.position = _position;
+            this.previousPosition = _position;
             this.aspectRatio = _aspectRatio;
             this.UpdateVectors();
         }
@@ -73,6 +77,21 @@ namespace skystride.vendor
         public AABB Hitbox()
         {
             return new AABB(this.position, new Vector3(this.hitboxSize, 2f, this.hitboxSize));
+        }
+
+        public void ResolveCollisions(IEnumerable<AABB> colliders)
+        {
+            if (colliders == null) return;
+            var camBox = Hitbox();
+            foreach (var c in colliders)
+            {
+                if (c != null && camBox.Intersects(c))
+                {
+                    // rollback to previous position
+                    this.position = this.previousPosition;
+                    return;
+                }
+            }
         }
 
         // Mouse look
@@ -101,6 +120,8 @@ namespace skystride.vendor
         public void UpdatePhysics(KeyboardState current, KeyboardState previous, float dt)
         {
             if (dt <= 0f) return;
+
+            this.previousPosition = this.position;
 
             // Free-fly mode (no gravity / physics constraints)
             if (!physicsEnabled)
