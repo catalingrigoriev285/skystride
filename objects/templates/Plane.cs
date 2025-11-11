@@ -40,6 +40,9 @@ namespace skystride.objects.templates
             this.textureEnabled = false;
         }
 
+        public Vector3 GetPosition() { return this.position; }
+        public Vector3 GetSize() { return new Vector3(this.width, this.height, this.depth); }
+
         public void SetPosition(Vector3 pos) { this.position = pos; }
         public void SetSize(float width, float depth)
         {

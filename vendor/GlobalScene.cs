@@ -60,6 +60,15 @@ namespace skystride.scenes
                 return;
             }
 
+            var plane = entity as Plane;
+            if (plane != null)
+            {
+                var size = plane.GetSize();
+                if (size != Vector3.Zero)
+                    Colliders.Add(new AABB(plane.GetPosition(), size));
+                return;
+            }
+
             // other entity types can be added here
         }
 

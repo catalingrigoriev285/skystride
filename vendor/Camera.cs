@@ -39,7 +39,7 @@ namespace skystride.vendor
         private float sprintMultiplier = 2.0f;
         private float jumpSpeed = 6.5f; // initial jump velocity
         private float gravity = -18.0f; // gravity acceleration (m/s^2)
-        private float groundY = 0.0f; // flat ground plane at Y=0
+        private float groundY = -10.0f; // flat ground plane at Y=0
         private float eyeHeight = 1.7f; // eye height above ground
 
         private float groundAccel = 60.0f; // ground acceleration
