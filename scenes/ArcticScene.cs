@@ -30,15 +30,15 @@ namespace skystride.scenes
             _sky.SetPosition(new Vector3(0f, 20f, 0f));
 
             AddEntity(new ModelEntity(
-                new Model("/assets/models/copac1.obj", "/assets/models/copac1.png"),
+                new Model("/assets/models/copac.obj", "/assets/models/copac.png"),
                 new Vector3(12f, 6f, 22f), 1f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
-                new Model("/assets/models/copac1.obj", "/assets/models/copac1.png"),
+                new Model("/assets/models/copac.obj", "/assets/models/copac.png"),
                 new Vector3(-13f, 6f, 14f), 1f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
-                new Model("/assets/models/copac1.obj", "/assets/models/copac1.png"),
+                new Model("/assets/models/copac.obj", "/assets/models/copac.png"),
                 new Vector3(-4f, 6f, -22f), 1f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
