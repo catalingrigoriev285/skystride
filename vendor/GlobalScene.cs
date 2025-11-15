@@ -77,7 +77,39 @@ namespace skystride.scenes
             {
                 var size = plane.GetSize();
                 if (size != Vector3.Zero)
-                    Colliders.Add(new AABB(plane.GetPosition(), size));
+                {
+                    // If plane is rotated we need to inflate its axis-aligned collider to cover the rotated extents.
+                    Vector3 rotDeg = plane.GetRotation();
+                    // Treat very thin planes (height <=0) as having a small thickness for collision purposes.
+                    float effectiveHeight = size.Y <=0f ?0.05f : size.Y; // small thickness if flat
+                    float hx = size.X *0.5f; // local half-width (X)
+                    float hy = effectiveHeight *0.5f; // local half-height (Y)
+                    float hz = size.Z *0.5f; // local half-depth (Z)
+
+                    Vector3 colliderSize;
+                    if (rotDeg != Vector3.Zero)
+                    {
+                        // Yaw (Y), Pitch (X), Roll (Z)
+                        float ry = MathHelper.DegreesToRadians(rotDeg.Y);
+                        float rx = MathHelper.DegreesToRadians(rotDeg.X);
+                        float rz = MathHelper.DegreesToRadians(rotDeg.Z);
+                        Matrix4 R = Matrix4.CreateRotationY(ry) * Matrix4.CreateRotationX(rx) * Matrix4.CreateRotationZ(rz);
+                        
+                        Vector4 r0 = R.Row0;
+                        Vector4 r1 = R.Row1;
+                        Vector4 r2 = R.Row2;
+                        float ex = Math.Abs(r0.X) * hx + Math.Abs(r0.Y) * hy + Math.Abs(r0.Z) * hz; // extent along world X
+                        float ey = Math.Abs(r1.X) * hx + Math.Abs(r1.Y) * hy + Math.Abs(r1.Z) * hz; // extent along world Y
+                        float ez = Math.Abs(r2.X) * hx + Math.Abs(r2.Y) * hy + Math.Abs(r2.Z) * hz; // extent along world Z
+                        colliderSize = new Vector3(ex *2f, ey *2f, ez *2f);
+                    }
+                    else
+                    {
+                        colliderSize = new Vector3(hx *2f, hy *2f, hz *2f); // unrotated
+                    }
+
+                    Colliders.Add(new AABB(plane.GetPosition(), colliderSize));
+                }
                 return;
             }
 

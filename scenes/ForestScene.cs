@@ -17,72 +17,68 @@ namespace skystride.scenes
     internal class ForestScene : GlobalScene
     {
         private Skybox _sky;
-        private Rain _rain;
 
         public ForestScene()
         {
             _sky = new Skybox("assets/textures/skybox/forest.jpg", 400f);
             _sky.SetPosition(new Vector3(0f, 20f, 0f));
 
-            _rain = new Rain(count: 2000, areaSize: 120f, spawnHeight: 50f, groundY: -10f, minSpeed: 12f, maxSpeed: 24f);
-            AddEntity(_rain);
+            Plane platform = new Plane(new Vector3(0f, 0f, 0f), 35f, 35f, 0.4f, Color.Cyan, new Vector3(0f, 0f, 0f));
+            platform.SetTexture("assets/textures/grass.jpg");
+            platform.SetTextureScale(20f, 20f);
+            AddEntity(platform);
 
-            Plane ground = new Plane(new Vector3(0f, 0f, 0f), 50f, 50f, 1f, Color.ForestGreen, new Vector3(0f, 1f, 0f));
-            ground.SetTexture("assets/textures/grass.png");
-            ground.SetTextureScale(10, 10);
-            AddEntity(ground);
+            Plane wallSpawn = new Plane(new Vector3(17f, 5.2f, 0f), 35f, 1f, 10f, Color.Brown, new Vector3(0f, 0f, 0f));
+            wallSpawn.SetTexture("assets/textures/bricks.jpg");
+            wallSpawn.SetTextureScale(5f, 2f);
+            wallSpawn.SetRotation(0f, 90f, 0f);
+            AddEntity(wallSpawn);
 
-            AddEntity(new ModelEntity(
-               new Model("/assets/models/kustik.obj", "/assets/models/kustik.png"),
-               new Vector3(12f, 1.8f, 9f), 1f, 0f, 0f, 0f), false);
+            Plane wallSpawn2 = new Plane(new Vector3(-17f, 5.2f, 0f), 35f, 1f, 10f, Color.Brown, new Vector3(0f, 0f, 0f));
+            wallSpawn2.SetTexture("assets/textures/bricks.jpg");
+            wallSpawn2.SetTextureScale(5f, 2f);
+            wallSpawn2.SetRotation(0f, 90f, 0f);
+            AddEntity(wallSpawn2);
 
-            AddEntity(new ModelEntity(
-               new Model("/assets/models/kustik.obj", "/assets/models/kustik.png"),
-               new Vector3(-12f, 1.8f, 4f), 1f, 0f, 0f, 0f), false);
-
-            AddEntity(new ModelEntity(
-               new Model("/assets/models/kustik.obj", "/assets/models/kustik.png"),
-               new Vector3(-4f, 1.8f, 16f), 1f, 0f, 0f, 0f), false);
-
-            AddEntity(new ModelEntity(
-               new Model("/assets/models/kustik.obj", "/assets/models/kustik.png"),
-               new Vector3(4f, 1.8f, -16f), 1f, 0f, 0f, 0f), false);
+            Plane wallSpawn3 = new Plane(new Vector3(0f, 5.2f, -17f), 35f, 1f, 10f, Color.Brown, new Vector3(0f, 0f, 0f));
+            wallSpawn3.SetTexture("assets/textures/bricks.jpg");
+            wallSpawn3.SetTextureScale(5f, 2f);
+            AddEntity(wallSpawn3);
 
             AddEntity(new ModelEntity(
-               new Model("/assets/models/kustik.obj", "/assets/models/kustik.png"),
-               new Vector3(-14f, 1.8f, -19f), 1f, 0f, 0f, 0f), false);
+                new Model("/assets/models/tree.obj", "/assets/textures/grass.jpg"),
+                new Vector3(24f, 17f, 5f), 1f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
-               new Model("/assets/models/bochka.obj", "/assets/models/bochka.png"),
-               new Vector3(33f, -3f, 0f), 6f, 0f, 0f, 0f));
+                new Model("/assets/models/tree.obj", "/assets/textures/grass.jpg"),
+                new Vector3(-24f, 17f, -5f), 1f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
-               new Model("/assets/models/bochka.obj", "/assets/models/bochka.png"),
-               new Vector3(43f, -3f, 6f), 6f, 0f, 0f, 0f));
+                new Model("/assets/models/tree.obj", "/assets/textures/grass.jpg"),
+                new Vector3(-5f, 17f, -24f), 1f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
-               new Model("/assets/models/bochka.obj", "/assets/models/bochka.png"),
-               new Vector3(53f, -3f, -2f), 6f, 0f, 0f, 0f));
+                new Model("/assets/models/bush.obj", "/assets/models/bush.jpg"),
+                new Vector3(-10f, 2.9f, 16f), 2f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
-               new Model("/assets/models/bochka.obj", "/assets/models/bochka.png"),
-               new Vector3(67f, -3f, 0f), 6f, 0f, 0f, 0f));
+                new Model("/assets/models/bush.obj", "/assets/models/bush.jpg"),
+                new Vector3(10f, 2.9f, 16f), 2f, 0f, 0f, 0f));
 
             AddEntity(new ModelEntity(
-               new Model("/assets/models/peretesus.obj", "/assets/models/peretesus.png"),
-               new Vector3(0,7, -30f),2.5f,0f,0f,0f,10f,10f));
+                new Model("/assets/models/box.obj", "/assets/models/box.jpg"),
+                new Vector3(0f, -2f, 24f), 5f, 0f, 0f, 0f));
 
-            AddEntity(new ModelEntity(
-               new Model("/assets/models/peretesus.obj", "/assets/models/peretesus.png"),
-               new Vector3(0, 7, 30f), 2.5f, 0f, 180f, 0f, 10f, 10f));
-
-            AddEntity(new ModelEntity(
-               new Model("/assets/models/peretesus.obj", "/assets/models/peretesus.png"),
-               new Vector3(-29, 7, 00f), 2.5f, 0f, 90f, 0f, 10f, 10f));
+            AddEntity(new Rain(count: 2000, areaSize: 120f, spawnHeight: 50f, groundY: -10f, minSpeed: 12f, maxSpeed: 24f));
         }
 
         public override void Update(float dt, Camera camera, KeyboardState currentKeyboard, KeyboardState previousKeyboard, MouseState currentMouse, MouseState previousMouse)
         {
+            if(camera.position.Y < -8f)
+            {
+                camera.SetPosition(new Vector3(0f, 10f, 0f));
+            }
+
             camera.ResolveCollisions(Colliders);
         }
 

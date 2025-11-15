@@ -17,6 +17,9 @@ namespace skystride.objects.templates
         private Color color;
         private Vector3 normal; // Surface normal used for lighting (top face normal)
 
+        // Rotation (Euler angles in degrees: X=pitch, Y=yaw, Z=roll)
+        private Vector3 rotationEulerDeg = Vector3.Zero;
+
         // Texture fields
         private int textureHandle; //0 => no texture
         private bool textureEnabled; // if true and textureHandle !=0, render textured
@@ -62,6 +65,23 @@ namespace skystride.objects.templates
         public void SetNormal(Vector3 n)
         {
             if (n.LengthSquared > 0f) this.normal = Vector3.Normalize(n);
+        }
+
+        public void SetRotation(Vector3 eulerDegrees)
+        {
+            this.rotationEulerDeg = eulerDegrees;
+        }
+        public void SetRotation(float xDeg, float yDeg, float zDeg)
+        {
+            this.rotationEulerDeg = new Vector3(xDeg, yDeg, zDeg);
+        }
+        public Vector3 GetRotation()
+        {
+            return this.rotationEulerDeg;
+        }
+        public void Rotate(float dxDeg, float dyDeg, float dzDeg)
+        {
+            this.rotationEulerDeg += new Vector3(dxDeg, dyDeg, dzDeg);
         }
 
         // Texture API
@@ -141,11 +161,16 @@ namespace skystride.objects.templates
             float hh = this.height * 0.5f; // Half height/thickness
             float px = position.X, py = position.Y, pz = position.Z;
 
-            // Top (if thickness) and/or single quad plane
-            Vector3 top00 = new Vector3(px - hw, py + hh, pz - hd);
-            Vector3 top01 = new Vector3(px - hw, py + hh, pz + hd);
-            Vector3 top10 = new Vector3(px + hw, py + hh, pz - hd);
-            Vector3 top11 = new Vector3(px + hw, py + hh, pz + hd);
+            GL.PushMatrix();
+            GL.Translate(px, py, pz);
+            if (rotationEulerDeg.Y != 0f) GL.Rotate(rotationEulerDeg.Y, 0f, 1f, 0f); // Yaw
+            if (rotationEulerDeg.X != 0f) GL.Rotate(rotationEulerDeg.X, 1f, 0f, 0f); // Pitch
+            if (rotationEulerDeg.Z != 0f) GL.Rotate(rotationEulerDeg.Z, 0f, 0f, 1f); // Roll
+
+            Vector3 top00 = new Vector3(-hw, +hh, -hd);
+            Vector3 top01 = new Vector3(-hw, +hh, +hd);
+            Vector3 top10 = new Vector3(+hw, +hh, -hd);
+            Vector3 top11 = new Vector3(+hw, +hh, +hd);
 
             bool useTexture = this.textureEnabled && this.textureHandle != 0;
             if (useTexture)
@@ -178,120 +203,115 @@ namespace skystride.objects.templates
                     GL.Vertex3(top11);
                     GL.Vertex3(top01);
                 }
-                GL.End();
+            }
+            else
+            {
+                // Compute bottom face vertices (local-space)
+                Vector3 bottom00 = new Vector3(-hw, -hh, -hd);
+                Vector3 bottom01 = new Vector3(-hw, -hh, +hd);
+                Vector3 bottom10 = new Vector3(+hw, -hh, -hd);
+                Vector3 bottom11 = new Vector3(+hw, -hh, +hd);
+
+                // Top face
+                GL.Normal3(this.normal);
                 if (useTexture)
                 {
-                    GL.BindTexture(TextureTarget.Texture2D, 0);
-                    GL.Disable(EnableCap.Texture2D);
+                    GL.TexCoord2(0f, 0f); GL.Vertex3(top00);
+                    GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(top10);
+                    GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
+                    GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top01);
                 }
-                return;
-            }
+                else
+                {
+                    GL.Vertex3(top00);
+                    GL.Vertex3(top10);
+                    GL.Vertex3(top11);
+                    GL.Vertex3(top01);
+                }
 
-            // Compute bottom face vertices
-            Vector3 bottom00 = new Vector3(px - hw, py - hh, pz - hd);
-            Vector3 bottom01 = new Vector3(px - hw, py - hh, pz + hd);
-            Vector3 bottom10 = new Vector3(px + hw, py - hh, pz - hd);
-            Vector3 bottom11 = new Vector3(px + hw, py - hh, pz + hd);
+                // Bottom face (inverse normal)
+                GL.Normal3(-this.normal);
+                if (useTexture)
+                {
+                    GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom10);
+                    GL.TexCoord2(0f, 0f); GL.Vertex3(bottom00);
+                    GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(bottom01);
+                    GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(bottom11);
+                }
+                else
+                {
+                    GL.Vertex3(bottom10);
+                    GL.Vertex3(bottom00);
+                    GL.Vertex3(bottom01);
+                    GL.Vertex3(bottom11);
+                }
 
-            // Top face
-            GL.Normal3(this.normal);
-            if (useTexture)
-            {
-                GL.TexCoord2(0f, 0f); GL.Vertex3(top00);
-                GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(top10);
-                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
-                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top01);
-            }
-            else
-            {
-                GL.Vertex3(top00);
-                GL.Vertex3(top10);
-                GL.Vertex3(top11);
-                GL.Vertex3(top01);
-            }
-
-            // Bottom face (inverse normal)
-            GL.Normal3(-this.normal);
-            if (useTexture)
-            {
-                GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom10);
-                GL.TexCoord2(0f, 0f); GL.Vertex3(bottom00);
-                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(bottom01);
-                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(bottom11);
-            }
-            else
-            {
-                GL.Vertex3(bottom10);
-                GL.Vertex3(bottom00);
-                GL.Vertex3(bottom01);
-                GL.Vertex3(bottom11);
-            }
-
-            // +X side
-            GL.Normal3(1f, 0f, 0f);
-            if (useTexture)
-            {
-                // u -> Z (depth), v -> Y (height)
-                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top10);
-                GL.TexCoord2(0f, 0f); GL.Vertex3(bottom10);
-                GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom11);
-                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
-            }
-            else
-            {
-                GL.Vertex3(top10);
-                GL.Vertex3(bottom10);
-                GL.Vertex3(bottom11);
-                GL.Vertex3(top11);
-            }
-            // -X side
-            GL.Normal3(-1f, 0f, 0f);
-            if (useTexture)
-            {
-                GL.TexCoord2(0f, 0f); GL.Vertex3(bottom00);
-                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top00);
-                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top01);
-                GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom01);
-            }
-            else
-            {
-                GL.Vertex3(bottom00);
-                GL.Vertex3(top00);
-                GL.Vertex3(top01);
-                GL.Vertex3(bottom01);
-            }
-            // +Z side
-            GL.Normal3(0f, 0f, 1f);
-            if (useTexture)
-            {
-                // u -> X (width), v -> Y (height)
-                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top01);
-                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
-                GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom11);
-                GL.TexCoord2(0f, 0f); GL.Vertex3(bottom01);
-            }
-            else
-            {
-                GL.Vertex3(top01);
-                GL.Vertex3(top11);
-                GL.Vertex3(bottom11);
-                GL.Vertex3(bottom01);
-            }
-            // -Z side
-            GL.Normal3(0f, 0f, -1f);
-            if (useTexture)
-            {
-                GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top10);
-                GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top00);
-                GL.TexCoord2(0f, 0f); GL.Vertex3(bottom00);
-                GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom10);
-            }
-            else
-            {
-                GL.Vertex3(top10);
-                GL.Vertex3(top00);
-                GL.Vertex3(bottom00);
-                GL.Vertex3(bottom10);
+                // +X side
+                GL.Normal3(1f, 0f, 0f);
+                if (useTexture)
+                {
+                    // u -> Z (depth), v -> Y (height)
+                    GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top10);
+                    GL.TexCoord2(0f, 0f); GL.Vertex3(bottom10);
+                    GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom11);
+                    GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
+                }
+                else
+                {
+                    GL.Vertex3(top10);
+                    GL.Vertex3(bottom10);
+                    GL.Vertex3(bottom11);
+                    GL.Vertex3(top11);
+                }
+                // -X side
+                GL.Normal3(-1f, 0f, 0f);
+                if (useTexture)
+                {
+                    GL.TexCoord2(0f, 0f); GL.Vertex3(bottom00);
+                    GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top00);
+                    GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top01);
+                    GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom01);
+                }
+                else
+                {
+                    GL.Vertex3(bottom00);
+                    GL.Vertex3(top00);
+                    GL.Vertex3(top01);
+                    GL.Vertex3(bottom01);
+                }
+                // +Z side
+                GL.Normal3(0f, 0f, 1f);
+                if (useTexture)
+                {
+                    // u -> X (width), v -> Y (height)
+                    GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top01);
+                    GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top11);
+                    GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom11);
+                    GL.TexCoord2(0f, 0f); GL.Vertex3(bottom01);
+                }
+                else
+                {
+                    GL.Vertex3(top01);
+                    GL.Vertex3(top11);
+                    GL.Vertex3(bottom11);
+                    GL.Vertex3(bottom01);
+                }
+                // -Z side
+                GL.Normal3(0f, 0f, -1f);
+                if (useTexture)
+                {
+                    GL.TexCoord2(this.texScaleU, this.texScaleV); GL.Vertex3(top10);
+                    GL.TexCoord2(0f, this.texScaleV); GL.Vertex3(top00);
+                    GL.TexCoord2(0f, 0f); GL.Vertex3(bottom00);
+                    GL.TexCoord2(this.texScaleU, 0f); GL.Vertex3(bottom10);
+                }
+                else
+                {
+                    GL.Vertex3(top10);
+                    GL.Vertex3(top00);
+                    GL.Vertex3(bottom00);
+                    GL.Vertex3(bottom10);
+                }
             }
 
             GL.End();
@@ -301,6 +321,8 @@ namespace skystride.objects.templates
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 GL.Disable(EnableCap.Texture2D);
             }
+
+            GL.PopMatrix();
         }
     }
 }
