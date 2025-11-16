@@ -55,7 +55,9 @@ namespace skystride.vendor
         private float hitboxSize = 1f;
 
         // turn physics on by default to allow standing/walking
-        private bool physicsEnabled = false;
+        private bool physicsEnabled = true;
+
+        public bool isPhysicsEnabled { get { return physicsEnabled; } }
 
         public bool doubleJumpEnabled = true;
         private bool hasDoubleJumped = false; // tracks if double jump was used since last time grounded
@@ -66,6 +68,12 @@ namespace skystride.vendor
             this.previousPosition = _position;
             this.aspectRatio = _aspectRatio;
             this.UpdateVectors();
+        }
+
+        public void ToggleDevMode()
+        {
+            physicsEnabled = !physicsEnabled;
+            moveSpeed = physicsEnabled ? 6.0f : 26.0f;
         }
 
         public Matrix4 GetViewMatrix()

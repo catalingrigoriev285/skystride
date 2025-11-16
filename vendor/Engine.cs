@@ -4,10 +4,6 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System;
 using System.Drawing;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using skystride.objects.templates;
 using skystride.scenes;
 using skystride.shaders;
@@ -31,8 +27,11 @@ namespace skystride.vendor
         // scene instance
         private GlobalScene activeScene;
 
+        // console system
+        private GameConsole gameConsole;
+
         // init engine window
-        public Engine() : base(800, 600, new GraphicsMode(32, 24, 0, 8))
+        public Engine() : base(800,600, new GraphicsMode(32,24,0,8))
         {
             VSync = VSyncMode.On;
 
@@ -54,9 +53,11 @@ namespace skystride.vendor
             GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
             GL.Enable(EnableCap.LineSmooth);
 
-            camera = new Camera(new Vector3(0, 5, 3), Width / (float)Height);
+            camera = new Camera(new Vector3(0,5,3), Width / (float)Height);
 
-            fog = new Fog(Color.DarkBlue, FogMode.Exp2, 0.005f, 30f, 250f);
+            gameConsole = new GameConsole(camera);
+
+            fog = new Fog(Color.DarkBlue, FogMode.Exp2,0.005f,30f,250f);
 
             //activeScene = new TemplateScene();
             //activeScene = new ArcticScene();
@@ -77,7 +78,7 @@ namespace skystride.vendor
         {
             base.OnResize(e);
 
-            GL.Viewport(0, 0, this.Width, this.Height);
+            GL.Viewport(0,0, this.Width, this.Height);
 
             camera.Resize(Width / (float)Height);
 
@@ -96,12 +97,16 @@ namespace skystride.vendor
             this.currentKeyboardState = Keyboard.GetState();
             this.currentMouseState = Mouse.GetState();
 
+            // Toggle console with Tilde / Grave accent key
+            if (currentKeyboardState.IsKeyDown(Key.Tilde) && !previousKeyboardState.IsKeyDown(Key.Tilde))
+            {
+                gameConsole.Toggle();
+            }
+
             if (currentKeyboardState[Key.Escape])
             {
                 CursorVisible = true;
                 this.isMouseCentered = false;
-
-                //Exit();
             }
 
             if (currentMouseState.LeftButton == ButtonState.Pressed)
@@ -110,15 +115,23 @@ namespace skystride.vendor
                 this.isMouseCentered = true;
             }
 
-            if (!CursorVisible && this.isMouseCentered && Focused)
+            if (!CursorVisible && this.isMouseCentered && Focused && !gameConsole.IsOpen)
             {
-                Mouse.SetPosition(X + Width / 2f, Y + Height / 2f);
+                Mouse.SetPosition(X + Width /2f, Y + Height /2f);
                 camera.UpdateMouseState(this.currentMouseState);
             }
 
-            camera.UpdatePhysics(currentKeyboardState, previousKeyboardState, (float)e.Time);
+            // Only update camera physics when console not active
+            if (!gameConsole.IsOpen)
+            {
+                camera.UpdatePhysics(currentKeyboardState, previousKeyboardState, (float)e.Time);
+            }
 
+            // Scene update always (can be paused if desired later)
             activeScene?.Update((float)e.Time, camera, currentKeyboardState, previousKeyboardState, currentMouseState, previousMouseState);
+
+            // Update console after capturing key states
+            gameConsole.Update(currentKeyboardState);
 
             this.previousKeyboardState = this.currentKeyboardState;
             this.previousMouseState = this.currentMouseState;
@@ -139,10 +152,13 @@ namespace skystride.vendor
 
             activeScene?.Render();
 
-            TextRenderer.RenderText($"x = {camera.position.X}, y = {camera.position.Y}, z = {camera.position.Z}", 16, 24, Color.White, Width, Height);
+            TextRenderer.RenderText($"x = {camera.position.X}, y = {camera.position.Y}, z = {camera.position.Z}",16,24, Color.White, Width, Height);
 
             // player info moved to left bottom
-            TextRenderer.RenderText($"{player.GetHealth()}+", 32, Height - 64, Color.DarkOrange, Width, Height, 32f);
+            TextRenderer.RenderText($"{player.GetHealth()}+",32, Height -64, Color.DarkOrange, Width, Height,32f);
+
+            // Render console overlay last
+            gameConsole.Render(Width, Height);
 
             SwapBuffers();
         }
