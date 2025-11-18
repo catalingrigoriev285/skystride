@@ -152,6 +152,9 @@ namespace skystride.vendor
 
             activeScene?.Render();
 
+            // crosshair
+            camera.RenderCrosshair(Width, Height);
+
             TextRenderer.RenderText($"x = {camera.position.X}, y = {camera.position.Y}, z = {camera.position.Z}",16,24, Color.White, Width, Height);
 
             // player info moved to left bottom

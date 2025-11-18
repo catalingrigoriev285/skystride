@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OpenTK.Graphics.OpenGL;
 
 namespace skystride.vendor
 {
@@ -412,6 +413,47 @@ namespace skystride.vendor
         public void AddPosition(Vector3 delta)
         {
             this.position += delta;
+        }
+
+        // crosshair
+        public void RenderCrosshair(int screenWidth, int screenHeight)
+        {
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+            GL.Ortho(0, screenWidth, screenHeight, 0, -1, 1);
+
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+
+            bool depthEnabled = GL.IsEnabled(EnableCap.DepthTest);
+            if (depthEnabled) GL.Disable(EnableCap.DepthTest);
+
+            // draw plus
+            GL.Color3(Color.White);
+            GL.LineWidth(2f);
+
+            float cx = screenWidth / 2f;
+            float cy = screenHeight / 2f;
+            float halfLen = 8f; // length from center to end
+
+            GL.Begin(PrimitiveType.Lines);
+            // vertical line
+            GL.Vertex2(cx, cy - halfLen);
+            GL.Vertex2(cx, cy + halfLen);
+            // horizontal line
+            GL.Vertex2(cx - halfLen, cy);
+            GL.Vertex2(cx + halfLen, cy);
+            GL.End();
+
+            if (depthEnabled) GL.Enable(EnableCap.DepthTest);
+
+            // Restore matrices
+            GL.PopMatrix(); // modelview
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PopMatrix();
+            GL.MatrixMode(MatrixMode.Modelview);
         }
     }
 }
