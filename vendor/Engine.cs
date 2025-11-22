@@ -173,7 +173,7 @@ namespace skystride.vendor
                 string ammoText = $"{player.GetAmmo()}";
                 float fontSize = 32f;
                 float textWidth = ammoText.Length * (fontSize * 0.6f);
-                TextRenderer.RenderText(ammoText, Width - (int)textWidth - 32, Height - 64, Color.Yellow, Width, Height, fontSize);
+                TextRenderer.RenderText(ammoText, Width - (int)textWidth - 32, Height - 64, Color.DarkOrange, Width, Height, fontSize);
             }
 
             // Render console overlay last
