@@ -59,6 +59,21 @@ namespace skystride.vendor
 
         public bool isPhysicsEnabled { get { return physicsEnabled; } }
 
+        // yaw/pitch for weapon alignment (degrees)
+        public float YawDegrees { get { return yaw; } }
+        public float PitchDegrees { get { return pitch; } }
+
+        // attached first-person weapon
+        private skystride.objects.weapons.Weapon attachedWeapon;
+        public void AttachWeapon(skystride.objects.weapons.Weapon _weapon)
+        {
+            attachedWeapon = _weapon;
+        }
+        public bool HasAttachedWeapon()
+        {
+            return attachedWeapon != null;
+        }
+
         public bool doubleJumpEnabled = true;
         private bool hasDoubleJumped = false; // tracks if double jump was used since last time grounded
 
@@ -453,6 +468,23 @@ namespace skystride.vendor
             GL.MatrixMode(MatrixMode.Projection);
             GL.PopMatrix();
             GL.MatrixMode(MatrixMode.Modelview);
+        }
+
+        // attached weapon
+        public void RenderWeapon()
+        {
+            if (attachedWeapon == null) return;
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.LoadIdentity();
+
+            bool depthWasEnabled = GL.IsEnabled(EnableCap.DepthTest);
+            if (depthWasEnabled) GL.Disable(EnableCap.DepthTest);
+
+            attachedWeapon.Render(this);
+
+            if (depthWasEnabled) GL.Enable(EnableCap.DepthTest);
+            GL.PopMatrix();
         }
     }
 }

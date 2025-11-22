@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="objects\CheckboardTerrain.cs" />
+    <Compile Include="objects\weapons\pistols\Glock.cs" />
+    <Compile Include="objects\weapons\Weapon.cs" />
     <Compile Include="scenes\ForestScene.cs" />
     <Compile Include="shaders\Rain.cs" />
     <Compile Include="vendor\GameConsole.cs" />

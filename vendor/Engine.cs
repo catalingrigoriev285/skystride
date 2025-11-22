@@ -154,6 +154,9 @@ namespace skystride.vendor
 
             activeScene?.Render();
 
+            // render first-person weapon before crosshair/UI
+            camera.RenderWeapon();
+
             // crosshair
             camera.RenderCrosshair(Width, Height);
 
