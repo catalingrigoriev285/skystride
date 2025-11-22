@@ -10,8 +10,7 @@ namespace skystride
     {
         static void Main(string[] args)
         {
-            vendor.Engine engine = new vendor.Engine();
-            engine.Run(60.0);
+
         }
     }
 }

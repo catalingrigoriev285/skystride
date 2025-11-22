@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("GrigorievC_tema04")]
+[assembly: AssemblyTitle("skystride")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("GrigorievC_tema04")]
+[assembly: AssemblyProduct("skystride")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("2c7eb59b-7c29-4317-8d9f-2ad6363e4244")]
+[assembly: Guid("77e88ca9-5468-45c3-8046-291b133b7c19")]
 
 // Version information for an assembly consists of the following four values:
 //
