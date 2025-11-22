@@ -168,6 +168,14 @@ namespace skystride.vendor
             // player info moved to left bottom
             TextRenderer.RenderText($"{player.GetHealth()}+",32, Height -64, Color.DarkOrange, Width, Height,32f);
 
+            if (player.HasAttachedWeapon())
+            {
+                string ammoText = $"{player.GetAmmo()}";
+                float fontSize = 32f;
+                float textWidth = ammoText.Length * (fontSize * 0.6f);
+                TextRenderer.RenderText(ammoText, Width - (int)textWidth - 32, Height - 64, Color.Yellow, Width, Height, fontSize);
+            }
+
             // Render console overlay last
             gameConsole.Render(Width, Height);
 

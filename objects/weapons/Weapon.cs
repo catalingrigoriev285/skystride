@@ -8,7 +8,10 @@ namespace skystride.objects.weapons
     {
         protected int ammo, damage;
         protected string name;
-        protected Model model; // 3D model
+        protected Model model;
+
+        protected Vector3 viewOffset = new Vector3(0.6f, -0.6f, -1.6f);
+        protected float scale = 0.25f;
 
         public Weapon(string name, int ammo, int damage)
         {
@@ -17,15 +20,31 @@ namespace skystride.objects.weapons
             this.damage = damage;
         }
 
+        public int Ammo { get { return ammo; } }
+
         public virtual void Render(Camera _camera)
         {
             if (model == null || !model.Loaded || _camera == null) return;
-            Vector3 pos = new Vector3(0.6f, -0.6f, -1.6f); // X right, Y down, Z into screen
 
             float rotX = 0f;
             float rotY = 0f;
-            float scale = 0.25f;
-            model.Render(pos, scale, rotX, rotY, 0f);
+            model.Render(viewOffset, scale, rotX, rotY, 0f);
+        }
+
+        public virtual Bullet Shoot(Vector3 playerPos, Vector3 front, Vector3 up, Vector3 right)
+        {
+            if (ammo <= 0) return null;
+            ammo--;
+
+            // viewOffset is in camera space: X=Right, Y=Up, Z=Back (so -Z is Front)
+            Vector3 muzzlePos = playerPos
+                              + right * viewOffset.X
+                              + up * viewOffset.Y
+                              - front * viewOffset.Z; // -(-1.6) = +1.6 * front
+
+            float speed = 100.0f;
+            float lifetime = 3.0f;
+            return new Bullet(muzzlePos, front, speed, lifetime);
         }
     }
 }

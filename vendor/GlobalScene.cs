@@ -4,6 +4,7 @@ using skystride.objects;
 using skystride.objects.templates;
 using skystride.vendor;
 using skystride.vendor.collision;
+using skystride.objects.weapons;
 using System;
 using System.Collections.Generic;
 
@@ -16,6 +17,7 @@ namespace skystride.scenes
         
         // Global colliders accumulated automatically
         protected readonly List<AABB> Colliders = new List<AABB>();
+        protected readonly List<Bullet> Bullets = new List<Bullet>();
 
         // Global draw distance
         public static float DrawDistance =150f; // default draw distance
@@ -253,6 +255,26 @@ namespace skystride.scenes
                 if (me != null)
                     me.Evaluate(CurrentCameraPos);
             }
+
+            // Handle shooting
+            if (player != null)
+            {
+                Bullet b = player.CheckShoot(currentMouse, previousMouse);
+                if (b != null)
+                {
+                    Bullets.Add(b);
+                }
+            }
+
+            // Update bullets
+            for (int i = Bullets.Count - 1; i >= 0; i--)
+            {
+                Bullets[i].Update(dt, Colliders);
+                if (Bullets[i].IsDead)
+                {
+                    Bullets.RemoveAt(i);
+                }
+            }
         }
 
         public virtual void Render()
@@ -260,6 +282,11 @@ namespace skystride.scenes
             for (int i =0; i < Entities.Count; i++)
             {
                 Entities[i].Render();
+            }
+
+            for (int i = 0; i < Bullets.Count; i++)
+            {
+                Bullets[i].Render();
             }
         }
 

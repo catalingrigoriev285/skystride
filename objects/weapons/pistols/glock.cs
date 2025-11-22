@@ -14,15 +14,9 @@ namespace skystride.objects.weapons.pistols
         {
             this.model = new Model("assets/models/weapons/glock.obj", "assets/models/weapons/glock.jpg");
             this.model.SetTextureScale(1f,1f);
-        }
-
-        public override void Render(Camera _camera)
-        {
-            if (model == null || !model.Loaded || _camera == null) return;
-
-            Vector3 pos = new Vector3(0.9f, -0.7f, -1.8f); // tweak for glock
-            float scale = 0.15f;
-            model.Render(pos, scale, 0f, 0f, 0f);
+            
+            this.viewOffset = new Vector3(0.9f, -0.7f, -1.8f);
+            this.scale = 0.15f;
         }
     }
 }

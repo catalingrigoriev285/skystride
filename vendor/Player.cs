@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Input;
 using skystride.vendor.collision;
+using skystride.objects.weapons;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -103,6 +104,11 @@ namespace skystride.vendor
         public bool HasAttachedWeapon()
         {
             return attachedWeapon != null;
+        }
+
+        public int GetAmmo()
+        {
+            return attachedWeapon != null ? attachedWeapon.Ammo : 0;
         }
 
         public void ToggleDevMode()
@@ -268,6 +274,15 @@ namespace skystride.vendor
             }
 
             position = pos;
+        }
+
+        public Bullet CheckShoot(MouseState current, MouseState previous)
+        {
+            if (attachedWeapon != null && current.IsButtonDown(MouseButton.Left) && !previous.IsButtonDown(MouseButton.Left))
+            {
+                return attachedWeapon.Shoot(this.position, this.front, this.up, this.right);
+            }
+            return null;
         }
 
         public void ResolveCollisions(IEnumerable<AABB> colliders)
