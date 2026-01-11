@@ -10,17 +10,17 @@ namespace skystride.objects.templates
 {
     internal class Plane : ISceneEntity
     {
-        private Vector3 position; // Center position of plane
-        private float width; // Size along X axis
-        private float depth; // Size along Z axis
-        private float height; // Size along Y axis (thickness); if <=0 a single quad is rendered
+        private Vector3 position;
+        private float width; // X
+        private float depth; // Z
+        private float height; // Y
         private Color color;
-        private Vector3 normal; // Surface normal used for lighting (top face normal)
+        private Vector3 normal;
 
-        // Rotation (Euler angles in degrees: X=pitch, Y=yaw, Z=roll)
+        // rotation (Euler angles in degrees: X=pitch, Y=yaw, Z=roll)
         private Vector3 rotationEulerDeg = Vector3.Zero;
 
-        // Texture fields
+        // texture fields
         private int textureHandle; //0 => no texture
         private bool textureEnabled; // if true and textureHandle !=0, render textured
         private float texScaleU = 1f; // tiling along local X or width on top/bottom
@@ -36,7 +36,7 @@ namespace skystride.objects.templates
             this.position = position;
             this.width = width <= 0f ? 1f : width;
             this.depth = depth <= 0f ? 1f : depth;
-            this.height = height < 0f ? 0f : height; // negative height coerced to0 (flat)
+            this.height = height < 0f ? 0f : height;
             this.color = color;
             this.normal = normal.LengthSquared > 0f ? Vector3.Normalize(normal) : new Vector3(0f, 1f, 0f);
             this.textureHandle = 0;
@@ -65,7 +65,7 @@ namespace skystride.objects.templates
         }
         public void SetHeight(float h)
         {
-            if (h >= 0f) this.height = h; // allow0 -> flat
+            if (h >= 0f) this.height = h;
         }
         public void SetColor(Color c) { this.color = c; }
         public void SetNormal(Vector3 n)
@@ -90,18 +90,19 @@ namespace skystride.objects.templates
             this.rotationEulerDeg += new Vector3(dxDeg, dyDeg, dzDeg);
         }
 
-        // Texture API
+        // texture
         public void SetTexture(string path)
         {
             if (this.textureHandle != 0)
             {
-                try { GL.DeleteTexture(this.textureHandle); } catch { /* ignore */ }
+                try { GL.DeleteTexture(this.textureHandle); } catch { }
                 this.textureHandle = 0;
             }
 
             string baseDir = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.FullName;
             string candidate = path ?? string.Empty;
             string fullPath;
+
             if (Path.IsPathRooted(candidate))
                 fullPath = candidate;
             else
@@ -162,9 +163,9 @@ namespace skystride.objects.templates
 
         public void Render()
         {
-            float hw = this.width * 0.5f; // Half width
-            float hd = this.depth * 0.5f; // Half depth
-            float hh = this.height * 0.5f; // Half height/thickness
+            float hw = this.width * 0.5f; // half width
+            float hd = this.depth * 0.5f; // galf depth
+            float hh = this.height * 0.5f; // galf height / thickness
             float px = position.X, py = position.Y, pz = position.Z;
 
             GL.PushMatrix();
@@ -183,7 +184,7 @@ namespace skystride.objects.templates
             {
                 GL.Enable(EnableCap.Texture2D);
                 GL.BindTexture(TextureTarget.Texture2D, this.textureHandle);
-                GL.Color3(1f, 1f, 1f); // avoid tint
+                GL.Color3(1f, 1f, 1f);
             }
             else
             {
@@ -212,13 +213,13 @@ namespace skystride.objects.templates
             }
             else
             {
-                // Compute bottom face vertices (local-space)
+                // bottom face vertices
                 Vector3 bottom00 = new Vector3(-hw, -hh, -hd);
                 Vector3 bottom01 = new Vector3(-hw, -hh, +hd);
                 Vector3 bottom10 = new Vector3(+hw, -hh, -hd);
                 Vector3 bottom11 = new Vector3(+hw, -hh, +hd);
 
-                // Top face
+                // top face
                 GL.Normal3(this.normal);
                 if (useTexture)
                 {
@@ -235,7 +236,7 @@ namespace skystride.objects.templates
                     GL.Vertex3(top01);
                 }
 
-                // Bottom face (inverse normal)
+                // bottom face
                 GL.Normal3(-this.normal);
                 if (useTexture)
                 {

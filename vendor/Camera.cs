@@ -28,7 +28,7 @@ namespace skystride.vendor
         public float Fov { get { return fov; } set { fov = value; } }
         private float aspectRatio;
 
-        // yaw/pitch accessors
+        // yaw/pitch
         public float YawDegrees { get { return yaw; } }
         public float PitchDegrees { get { return pitch; } }
 
@@ -118,7 +118,6 @@ namespace skystride.vendor
 
             if (depthEnabled) GL.Enable(EnableCap.DepthTest);
 
-            // Restore matrices
             GL.PopMatrix(); // modelview
             GL.MatrixMode(MatrixMode.Projection);
             GL.PopMatrix();

@@ -69,7 +69,7 @@ namespace skystride.vendor
         public bool doubleJumpEnabled = true;
         private bool hasDoubleJumped = false; // tracks if double jump was used since last time grounded
 
-        // Damage feedback
+        // damage feedback
         private float damageFlashTimer = 0f;
         private const float damageFlashDuration = 0.5f;
 
@@ -97,7 +97,7 @@ namespace skystride.vendor
             {
                 health = 0;
             }
-            // Trigger damage flash
+            // trigger damage flash
             damageFlashTimer = damageFlashDuration;
         }
 
@@ -218,14 +218,14 @@ namespace skystride.vendor
         {
             if (dt <= 0f) return;
 
-            // Update damage flash timer
+            // update damage flash timer
             if (damageFlashTimer > 0f)
             {
                 damageFlashTimer -= dt;
                 if (damageFlashTimer < 0f) damageFlashTimer = 0f;
             }
 
-            // Weapon switching
+            // weapon switching
             if (current.IsKeyDown(Key.Number1)) SwitchWeapon(0);
             if (current.IsKeyDown(Key.Number2)) SwitchWeapon(1);
             if (current.IsKeyDown(Key.Number3)) SwitchWeapon(2);
@@ -235,7 +235,7 @@ namespace skystride.vendor
             // store previous position for collision rollback/resolution
             this.previousPosition = this.position;
 
-            // Free-fly mode (no gravity / physics constraints)
+            // free-fly mode (no gravity / physics)
             if (!physicsEnabled)
             {
                 Vector3 dir = Vector3.Zero;
@@ -272,7 +272,7 @@ namespace skystride.vendor
             if (leftKey) wishDir -= rightVec;
             if (wishDir.LengthSquared > 0f) wishDir.NormalizeFast();
 
-            // sprint modifies target speed
+            // sprint
             float targetSpeed = moveSpeed * (current.IsKeyDown(Key.ShiftLeft) ? sprintMultiplier : 1f);
 
             bool jumpPressed = current.IsKeyDown(Key.Space) && !previous.IsKeyDown(Key.Space);
@@ -320,7 +320,6 @@ namespace skystride.vendor
                 {
                     velocity.Y = jumpSpeed;
 
-                    // optional forward push similar to ground jump
                     Vector3 jumpPushDir = forward;
                     if (jumpPushDir.LengthSquared > 0f)
                     {
@@ -332,18 +331,16 @@ namespace skystride.vendor
                     hasDoubleJumped = true;
                 }
 
-                // optional very small air drag to stabilize
                 //velocity.X *=1f; velocity.Z *=1f;
             }
 
-            // gravity always
+            // gravity
             velocity.Y += gravity * dt;
 
-            // integrate
             Vector3 pos = position;
             pos += velocity * dt;
 
-            // ground plane clamp (fallback if not on top of any collider)
+            // fallback if not on top of any collider
             float minY = groundY + eyeHeight;
             if (pos.Y <= minY)
             {
@@ -359,7 +356,7 @@ namespace skystride.vendor
 
             position = pos;
 
-            // Update weapon animation
+            // update weapon animation
             if (attachedWeapon != null)
             {
                 attachedWeapon.Update(dt);
@@ -384,7 +381,7 @@ namespace skystride.vendor
                     float force = attachedWeapon.RecoilForce;
                     if (force > 0f)
                     {
-                        // Push player back
+                        // push player back
                         Vector3 pushDir = -this.front;
                         this.velocity += pushDir * force;
                     }
@@ -392,7 +389,7 @@ namespace skystride.vendor
                 return b;
             }
 
-            // Right click handling
+            // right click handling
             bool rightClick = current.IsButtonDown(MouseButton.Right) && !previous.IsButtonDown(MouseButton.Right);
             if (attachedWeapon != null && rightClick)
             {
@@ -407,9 +404,9 @@ namespace skystride.vendor
             if (colliders == null) return;
             if (physicsEnabled == false) return;
 
-            // Camera half-extents (based on Hitbox())
+            // camera half-extents (based on Hitbox())
             float halfX = this.hitboxSize * 0.5f; //0.5f
-            float halfY = 1.0f; // since hitbox Y size is2f
+            float halfY = 1.0f;
             float halfZ = this.hitboxSize * 0.5f;
 
             Vector3 p = this.position;
@@ -421,13 +418,11 @@ namespace skystride.vendor
                 if (c == null) continue;
                 if (c.Owner is skystride.objects.Item) continue;
 
-                // compute current camera box and collider box using local p
                 Vector3 camMin = new Vector3(p.X - halfX, p.Y - halfY, p.Z - halfZ);
                 Vector3 camMax = new Vector3(p.X + halfX, p.Y + halfY, p.Z + halfZ);
                 Vector3 colMin = c.Min;
                 Vector3 colMax = c.Max;
 
-                // quick reject
                 if (camMax.X <= colMin.X || camMin.X >= colMax.X ||
                     camMax.Y <= colMin.Y || camMin.Y >= colMax.Y ||
                     camMax.Z <= colMin.Z || camMin.Z >= colMax.Z)
@@ -439,10 +434,8 @@ namespace skystride.vendor
                 bool overlapX = camMax.X > colMin.X && camMin.X < colMax.X;
                 bool overlapZ = camMax.Z > colMin.Z && camMin.Z < colMax.Z;
 
-                //1) Vertical resolution (standing on top or hitting head)
                 if (overlapX && overlapZ)
                 {
-                    // coming from above -> land on top
                     float prevBottom = previousPosition.Y - halfY;
                     float prevTop = previousPosition.Y + halfY;
 
@@ -459,7 +452,6 @@ namespace skystride.vendor
                         continue;
                     }
 
-                    // coming from below -> bonk head
                     if (prevTop <= colMin.Y && camMax.Y > colMin.Y)
                     {
                         p.Y = colMin.Y - halfY;
@@ -475,14 +467,13 @@ namespace skystride.vendor
 
                 if (penX < penZ)
                 {
-                    // resolve along X
+                    // resolve X
                     if (previousPosition.X <= colMin.X)
                         p.X = colMin.X - halfX;
                     else if (previousPosition.X >= colMax.X)
                         p.X = colMax.X + halfX;
                     else
                     {
-                        // fallback by direction of smallest displacement
                         if ((camMax.X - colMin.X) < (colMax.X - camMin.X))
                             p.X = colMin.X - halfX;
                         else
@@ -491,7 +482,7 @@ namespace skystride.vendor
                 }
                 else
                 {
-                    // resolve along Z
+                    // resolve Z
                     if (previousPosition.Z <= colMin.Z)
                         p.Z = colMin.Z - halfZ;
                     else if (previousPosition.Z >= colMax.Z)
@@ -563,7 +554,6 @@ namespace skystride.vendor
             camera.SetVectors(this.front, this.up, this.right);
 
             float targetFov = attachedWeapon != null ? attachedWeapon.GetDesiredFov() : 60.0f;
-            // Simple Lerp
             camera.Fov = camera.Fov + (targetFov - camera.Fov) * 0.1f;
         }
 
@@ -594,7 +584,6 @@ namespace skystride.vendor
         {
             if (damageFlashTimer > 0f)
             {
-                // Calculate alpha based on remaining time
                 float alpha = (damageFlashTimer / damageFlashDuration) * 0.5f; // Max alpha 0.5
 
                 GL.Enable(EnableCap.Blend);
@@ -627,7 +616,7 @@ namespace skystride.vendor
                 GL.Enable(EnableCap.DepthTest);
                 GL.Enable(EnableCap.Texture2D);
                 GL.Disable(EnableCap.Blend);
-                GL.Color4(1f, 1f, 1f, 1f); // Reset color
+                GL.Color4(1f, 1f, 1f, 1f);
             }
         }
     }

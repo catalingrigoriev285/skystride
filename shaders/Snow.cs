@@ -13,7 +13,7 @@ namespace skystride.shaders
         {
             public Vector3 Position;
             public float Speed; // downward speed (positive value)
-            public float Size; // point size (desired)
+            public float Size; // point size
         }
 
         private Particle[] _particles;
@@ -40,7 +40,7 @@ namespace skystride.shaders
         private float _windZ;
         private float _windChangeTimer;
 
-        // point sprite texture (circular alpha mask)
+        // point sprite texture
         private int _spriteTex;
         private bool _spriteReady;
 
@@ -106,7 +106,7 @@ namespace skystride.shaders
                 float cy = (H - 1) * 0.5f;
                 float r = Math.Min(cx, cy) - 1f;
                 float r2 = r * r;
-                float feather = r * 0.2f; // soft edge
+                float feather = r * 0.2f;
                 float inner = r - feather;
                 float inner2 = inner * inner;
 
@@ -250,7 +250,6 @@ namespace skystride.shaders
                 GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Modulate);
             }
 
-            // prepare size buckets to avoid calling PointSize inside Begin/End
             float sSmall = ClampSize(_minSize * _sizeScale);
             float sMed = ClampSize(((_minSize + _maxSize) * 0.5f) * _sizeScale);
             float sLarge = ClampSize(_maxSize * _sizeScale);

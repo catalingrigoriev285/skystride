@@ -55,7 +55,7 @@ namespace skystride.vendor
                     if (!hasTexcoords)
                         GeneratePlanarTexcoords();
 
-                    // Load texture data into memory but don't upload yet
+                    // load texture data into memory but don't upload
                     LoadTextureBitmap();
 
                     isDataLoaded = true;
@@ -145,7 +145,7 @@ namespace skystride.vendor
 
         private void AddVertexFromToken(string token, List<Vector3> tempPositions, List<Vector2> tempTex, List<Vector3> tempNormals, Dictionary<string, int> vertMap)
         {
-            // token format can be: v, v/vt, v//vn, v/vt/vn
+            // token format: v, v/vt, v//vn, v/vt/vn
             int vi = -1, ti = -1, ni = -1;
             var parts = token.Split('/');
             vi = ParseIndex(parts, 0) - 1;
@@ -272,7 +272,6 @@ namespace skystride.vendor
 
         private void GeneratePlanarTexcoords()
         {
-            // Simple XZ planar mapping scaled to bounding box
             float dx = Math.Max(1e-5f, size.X);
             float dz = Math.Max(1e-5f, size.Z);
             for (int i = 0; i < vertices.Count; i++)
@@ -341,8 +340,6 @@ namespace skystride.vendor
             {
                 try
                 {
-                    // Load into a temporary bitmap to avoid locking the file or threading issues with GDI+ if possible
-                    // But Bitmap(path) locks the file. We can copy it.
                     using (var temp = new Bitmap(pathToUse))
                     {
                         textureBitmap = new Bitmap(temp);
@@ -404,7 +401,7 @@ namespace skystride.vendor
 
         public void Render(Vector3 position, float scale, float rotX, float rotY, float rotZ)
         {
-            if (!isDataLoaded) return; // Still loading in background
+            if (!isDataLoaded) return;
 
             if (!isUploaded)
             {
@@ -437,7 +434,7 @@ namespace skystride.vendor
                 GL.Enable(EnableCap.Texture2D);
                 GL.BindTexture(TextureTarget.Texture2D, textureHandle);
                 GL.EnableClientState(ArrayCap.TextureCoordArray);
-                // Set texture matrix for scaling
+                // texture matrix for scaling
                 GL.MatrixMode(MatrixMode.Texture);
                 GL.LoadIdentity();
                 GL.Scale(_texScaleU, _texScaleV, 1f);
@@ -465,7 +462,7 @@ namespace skystride.vendor
                 GL.DisableClientState(ArrayCap.TextureCoordArray);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 GL.Disable(EnableCap.Texture2D);
-                // Reset texture matrix
+
                 GL.MatrixMode(MatrixMode.Texture);
                 GL.LoadIdentity();
                 GL.MatrixMode(MatrixMode.Modelview);

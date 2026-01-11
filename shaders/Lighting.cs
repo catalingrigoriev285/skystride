@@ -57,7 +57,7 @@ namespace skystride.shaders
                 // Light model configuration
                 GL.LightModel(LightModelParameter.LightModelAmbient, _globalAmbient);
                 GL.LightModel(LightModelParameter.LightModelLocalViewer, 1);
-                GL.LightModel(LightModelParameter.LightModelTwoSide, 0); // Usually 0 for performance unless needed
+                GL.LightModel(LightModelParameter.LightModelTwoSide, 0);
 
                 // Sun Properties (Light0)
                 GL.Light(LightName.Light0, LightParameter.Position, _sunPosition);

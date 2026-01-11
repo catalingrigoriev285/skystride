@@ -21,25 +21,25 @@ namespace skystride.vendor.collision
 
         public bool Intersects(AABB element)
         {
-            // Check for no overlap on the X-axis
+            // check for no overlap on the X-axis
             if (this.Max.X < element.Min.X || this.Min.X > element.Max.X)
             {
                 return false;
             }
 
-            // Check for no overlap on the Y-axis
+            // check for no overlap on the Y-axis
             if (this.Max.Y < element.Min.Y || this.Min.Y > element.Max.Y)
             {
                 return false;
             }
 
-            // Check for no overlap on the Z-axis
+            // check for no overlap on the Z-axis
             if (this.Max.Z < element.Min.Z || this.Min.Z > element.Max.Z)
             {
                 return false;
             }
 
-            // If there's no separation on all three axes, the boxes must be colliding
+            // there's no separation on all three axes, the boxes must be colliding
             return true;
         }
     }

@@ -68,7 +68,7 @@ namespace skystride.scenes
         public override void OnLoad()
         {
             base.OnLoad();
-            SoundManager.PlayMusic("../../assets/sounds/vertigont.wav");
+            //SoundManager.PlayMusic("../../assets/sounds/vertigont.wav");
 
             _engine.player.SetPosition(new Vector3(0f, 5f, -20f));
 

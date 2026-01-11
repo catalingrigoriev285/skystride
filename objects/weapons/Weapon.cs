@@ -77,8 +77,7 @@ namespace skystride.objects.weapons
             recoilOffset.Z += recoilKickBack; // Move back
             recoilRotation.X += recoilKickUp; // Rotate up (inverted from -= to make it rise)
 
-            // viewOffset is in camera space: X=Right, Y=Up, Z=Back (so -Z is Front)
-            // Use spawnOffset for bullet origin to prevent clipping
+            // viewOffset is in camera space: X=Right, Y=Up, Z=Back (-Z is Front)
             Vector3 muzzlePos = playerPos
                               + right * spawnOffset.X
                               + up * spawnOffset.Y

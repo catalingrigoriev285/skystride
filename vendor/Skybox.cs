@@ -94,31 +94,30 @@ namespace skystride.objects
 
             GL.Begin(PrimitiveType.Quads);
 
-            // +Z face (front) - UV so that image top is +Y
+            // +Z face (front)
             if (_textureReady) { GL.TexCoord2(0f, 0f); } GL.Vertex3(v011); // top-left
             if (_textureReady) { GL.TexCoord2(1f, 0f); } GL.Vertex3(v111); // top-right
             if (_textureReady) { GL.TexCoord2(1f, 1f); } GL.Vertex3(v101); // bottom-right
             if (_textureReady) { GL.TexCoord2(0f, 1f); } GL.Vertex3(v001); // bottom-left
 
-            // -Z face (back) - keep same rotation (top is +Y, left is +X)
+            // -Z face (back)
             if (_textureReady) { GL.TexCoord2(0f, 0f); } GL.Vertex3(v110); // top-left (+X)
             if (_textureReady) { GL.TexCoord2(1f, 0f); } GL.Vertex3(v010); // top-right (-X)
             if (_textureReady) { GL.TexCoord2(1f, 1f); } GL.Vertex3(v000); // bottom-right
             if (_textureReady) { GL.TexCoord2(0f, 1f); } GL.Vertex3(v100); // bottom-left
 
-            // +X face (right) - keep same rotation (top is +Y, left is +Z)
+            // +X face (right)
             if (_textureReady) { GL.TexCoord2(0f, 0f); } GL.Vertex3(v111); // top-left (+Z)
             if (_textureReady) { GL.TexCoord2(1f, 0f); } GL.Vertex3(v110); // top-right (-Z)
             if (_textureReady) { GL.TexCoord2(1f, 1f); } GL.Vertex3(v100); // bottom-right
             if (_textureReady) { GL.TexCoord2(0f, 1f); } GL.Vertex3(v101); // bottom-left
 
-            // -X face (left) - keep same rotation (top is +Y, left is -Z)
+            // -X face (left)
             if (_textureReady) { GL.TexCoord2(0f, 0f); } GL.Vertex3(v010); // top-left (-Z)
             if (_textureReady) { GL.TexCoord2(1f, 0f); } GL.Vertex3(v011); // top-right (+Z)
             if (_textureReady) { GL.TexCoord2(1f, 1f); } GL.Vertex3(v001); // bottom-right
             if (_textureReady) { GL.TexCoord2(0f, 1f); } GL.Vertex3(v000); // bottom-left
 
-            // top and bottom faces intentionally not drawn
             GL.End();
 
             if (_textureReady)
@@ -127,7 +126,6 @@ namespace skystride.objects
                 GL.Disable(EnableCap.Texture2D);
             }
 
-            // restore depth state
             GL.DepthMask(true);
             if (hadDepthTest) GL.Enable(EnableCap.DepthTest); else GL.Disable(EnableCap.DepthTest);
         }

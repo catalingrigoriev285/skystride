@@ -137,7 +137,6 @@ namespace skystride.vendor
             this.currentKeyboardState = Keyboard.GetState();
             this.currentMouseState = Mouse.GetState();
 
-            // Toggle console with Tilde / Grave accent key
             if (currentKeyboardState.IsKeyDown(Key.Tilde) && !previousKeyboardState.IsKeyDown(Key.Tilde))
             {
                 gameConsole.Toggle();
@@ -189,13 +188,12 @@ namespace skystride.vendor
                 player.Update(currentKeyboardState, previousKeyboardState, (float)e.Time);
             }
 
-            // Sync camera with player
+            // sync camera with player
             player.UpdateCamera(camera);
 
-            // Scene update always (can be paused if desired later)
             activeScene?.Update((float)e.Time, player, camera, currentKeyboardState, previousKeyboardState, currentMouseState, previousMouseState);
 
-            // Update console after capturing key states
+            // update console after capturing key states
             gameConsole.Update(currentKeyboardState);
 
             this.previousKeyboardState = this.currentKeyboardState;
@@ -219,7 +217,7 @@ namespace skystride.vendor
                 {
                     CursorVisible = false;
                     this.isMouseCentered = true;
-                    BlockShootOnce = true; // prevent accidental shot on focus regain
+                    BlockShootOnce = true;
                     InputEnabled = true;
                 }
             }
@@ -232,7 +230,6 @@ namespace skystride.vendor
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            // Update projection matrix every frame to support FOV changes (zoom)
             Matrix4 projection = camera.GetProjectionMatrix();
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadMatrix(ref projection);
@@ -250,15 +247,13 @@ namespace skystride.vendor
 
                 if (!loaded)
                 {
-                    // Clear the screen again to hide the partially loaded scene
                     GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-                    // Render loading screen
                     loadingScreen.SetProgress(progress);
                     loadingScreen.Render(Width, Height);
 
                     SwapBuffers();
-                    return; // Skip rest of frame
+                    return;
                 }
                 else
                 {
@@ -271,7 +266,6 @@ namespace skystride.vendor
 
             this.fog.Render();
 
-            // render first-person weapon before crosshair/UI
             player.RenderWeapon(camera);
 
             GL.Disable(EnableCap.Lighting);
@@ -283,7 +277,6 @@ namespace skystride.vendor
 
                 TextRenderer.RenderText($"x = {player.position.X}, y = {player.position.Y}, z = {player.position.Z}", 16, 24, Color.White, Width, Height);
 
-                // player info moved to left bottom
                 TextRenderer.RenderText($"{player.GetHealth()}+", 32, Height - 64, Color.DarkOrange, Width, Height, 32f);
 
                 if (player.HasAttachedWeapon())
@@ -295,7 +288,6 @@ namespace skystride.vendor
                 }
             }
 
-            // Render console overlay 
             gameConsole.Render(Width, Height);
 
             if (!HideUI)
@@ -309,12 +301,10 @@ namespace skystride.vendor
             SwapBuffers();
         }
 
-        // Scene change API used by console
         internal bool ChangeScene(string mapName)
         {
             string key = (mapName ?? string.Empty).Trim().ToLowerInvariant();
             
-            // Show loading screen
             loadingScreen.Show();
             loadingScreen.SetLoadingText($"LOADING {key.ToUpper()}...");
             loadingScreen.SetProgress(0.0f);
@@ -364,22 +354,20 @@ namespace skystride.vendor
             player.UpdateCamera(camera);
             MapEditor.UpdateScene(mapName);
             
-            // Start async loading phase
+            // async loading phase
             _isLoadingScene = true;
             
-            // Force one update to start loading entities immediately
             activeScene?.Update(0f, player, camera, currentKeyboardState, previousKeyboardState, currentMouseState, previousMouseState);
             
             return true;
         }
 
-        // Helper method to render a frame with just the loading screen
         private void RenderLoadingFrame()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             loadingScreen.Render(Width, Height);
             SwapBuffers();
-            ProcessEvents(); // Process window events
+            ProcessEvents(); // process window events
         }
     }
 }

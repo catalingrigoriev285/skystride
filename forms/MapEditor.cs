@@ -14,7 +14,6 @@ namespace skystride.forms
 {
     public partial class MapEditor : Form
     {
-        // static host
         private static System.Threading.Thread _uiThread;
         private static MapEditor _instance;
         public static volatile bool EditorHasFocus;
@@ -62,6 +61,7 @@ namespace skystride.forms
             _uiThread.SetApartmentState(System.Threading.ApartmentState.STA);
             _uiThread.Start();
         }
+
         // editor camera & scene
         private Camera editorCamera;
         private GlobalScene activeScene;
@@ -79,7 +79,7 @@ namespace skystride.forms
         private Point lastMousePos;
         private float yaw = -90.0f;
         private float pitch = 0.0f;
-        private const float mouseSensitivity = 0.2f; // similar to player
+        private const float mouseSensitivity = 0.2f;
         private const float moveSpeed = 8.0f;
 
         // UI Controls
@@ -142,7 +142,7 @@ namespace skystride.forms
 
             glControlMapEditor.TabStop = true; // allow focus by click/tab
 
-            // start render loop
+            // render loop
             stopwatch = Stopwatch.StartNew();
             lastElapsedMs = stopwatch.ElapsedMilliseconds;
             renderTimer = new Timer { Interval = 16 }; // ~60 FPS
@@ -205,10 +205,10 @@ namespace skystride.forms
         {
             glControlMapEditor.MakeCurrent();
 
-            // compute delta time
+            // delta time
             long now = stopwatch?.ElapsedMilliseconds ?? 0;
             float dt = (now - lastElapsedMs) / 1000f;
-            if (dt < 0f || dt > 1f) dt = 0f; // clamp if debugger pauses
+            if (dt < 0f || dt > 1f) dt = 0f; // if debugger pauses
             lastElapsedMs = now;
 
             if (glControlMapEditor.Focused)
@@ -223,7 +223,7 @@ namespace skystride.forms
             // render
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            // set matrices
+            // matrices
             Matrix4 proj = editorCamera.GetProjectionMatrix();
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadMatrix(ref proj);
@@ -406,7 +406,7 @@ namespace skystride.forms
                         dragStartPos = selectedEntity.GetPosition();
                         dragStartSize = selectedEntity.GetSize();
 
-                        // Determine drag plane
+                        // determine drag plane
                         Vector3 viewDir = editorCamera.front;
                         dragPlanePoint = dragStartPos;
 
@@ -430,9 +430,9 @@ namespace skystride.forms
                         }
                         else
                         {
-                            isDraggingGizmo = false; // Should not happen if we hit the gizmo
+                            isDraggingGizmo = false;
                         }
-                        return; // Consume event
+                        return;
                     }
                 }
 
@@ -440,6 +440,7 @@ namespace skystride.forms
                 if (closest != null)
                 {
                     selectedEntity = closest;
+
                     // Sync ListBox
                     if (activeScene != null)
                     {
@@ -454,7 +455,7 @@ namespace skystride.forms
                 }
                 else
                 {
-                    // Deselect if clicked on empty space
+                    // deselect if clicked on empty space
                     selectedEntity = null;
                     lstEntities.SelectedIndex = -1;
                 }
@@ -495,12 +496,12 @@ namespace skystride.forms
                 }
                 else if (entity is Plane plane)
                 {
-                    // Treat plane as thin AABB
+                    // treat plane as thin AABB
                     Vector3 size = plane.GetSize();
                     Vector3 pos = plane.GetPosition();
 
                     float sx = Math.Max(size.X, 0.1f);
-                    float sy = Math.Max(size.Y, 0.1f); // planes usually flat on Y or Z depending on rotation, but size is dimensions
+                    float sy = Math.Max(size.Y, 0.1f);
                     float sz = Math.Max(size.Z, 0.1f);
 
 
@@ -509,7 +510,7 @@ namespace skystride.forms
                     Vector3 max = pos + new Vector3(maxDim / 2f);
                     hit = RayIntersectsAABB(ray, min, max, out dist);
                 }
-                else if (entity.GetType().Name == "ModelEntity") // Reflection or check type if public
+                else if (entity.GetType().Name == "ModelEntity") // reflection or check type if public
                 {
                     Vector3 pos = entity.GetPosition();
                     Vector3 min = pos - new Vector3(1f);
@@ -555,7 +556,7 @@ namespace skystride.forms
             if (tzmin > tmin) tmin = tzmin;
             if (tzmax < tmax) tmax = tzmax;
 
-            if (tmax < 0) return false; // Box is behind ray
+            if (tmax < 0) return false; // box is behind ray
 
             distance = tmin >= 0 ? tmin : tmax;
             return true;
@@ -594,14 +595,13 @@ namespace skystride.forms
             }
         }
 
-
-
         private void ExitMouseLook()
         {
             if (isMouseLook)
             {
                 isMouseLook = false;
             }
+
             try { Cursor.Show(); } catch { }
         }
 
@@ -609,7 +609,9 @@ namespace skystride.forms
         private void LoadScene(string mapName)
         {
             string key = (mapName ?? string.Empty).Trim().ToLowerInvariant();
+
             GlobalScene newScene = null;
+
             switch (key)
             {
                 case "forest":
@@ -624,17 +626,18 @@ namespace skystride.forms
 
             activeScene?.Dispose();
             activeScene = newScene;
+
             RefreshEntityList();
         }
-
-
 
         private void RefreshEntityList()
         {
             lstEntities.Items.Clear();
+
             if (activeScene != null)
             {
                 var entities = activeScene.GetEntities();
+
                 for (int i = 0; i < entities.Count; i++)
                 {
                     lstEntities.Items.Add($"{i}: {entities[i].GetType().Name}");
@@ -647,6 +650,7 @@ namespace skystride.forms
             if (lstEntities.SelectedIndex >= 0 && activeScene != null)
             {
                 var entities = activeScene.GetEntities();
+
                 if (lstEntities.SelectedIndex < entities.Count)
                 {
                     selectedEntity = entities[lstEntities.SelectedIndex];
@@ -663,12 +667,14 @@ namespace skystride.forms
         {
             if (rbTranslate.Checked) gizmo.CurrentMode = GizmoMode.Translate;
             else if (rbScale.Checked) gizmo.CurrentMode = GizmoMode.Scale;
+
             glControlMapEditor.Invalidate();
         }
 
         private void UpdatePositionControls()
         {
             if (selectedEntity == null) return;
+
             ignoreEvents = true;
             var pos = selectedEntity.GetPosition();
             numPosX.Value = (decimal)pos.X;
@@ -686,14 +692,18 @@ namespace skystride.forms
         private void NumPos_ValueChanged(object sender, EventArgs e)
         {
             if (ignoreEvents || selectedEntity == null) return;
+
             var newPos = new Vector3((float)numPosX.Value, (float)numPosY.Value, (float)numPosZ.Value);
+
             selectedEntity.SetPosition(newPos);
         }
 
         private void NumSize_ValueChanged(object sender, EventArgs e)
         {
             if (ignoreEvents || selectedEntity == null) return;
+
             var newSize = new Vector3((float)numSizeX.Value, (float)numSizeY.Value, (float)numSizeZ.Value);
+
             selectedEntity.SetSize(newSize);
         }
 
@@ -702,7 +712,9 @@ namespace skystride.forms
             if (activeScene != null)
             {
                 activeScene.AddEntity(entity);
+
                 RefreshEntityList();
+
                 lstEntities.SelectedIndex = lstEntities.Items.Count - 1;
             }
         }
@@ -738,24 +750,14 @@ namespace skystride.forms
                     }
                     else if (gizmo.CurrentMode == GizmoMode.Scale)
                     {
-                        // Scale logic: dragging along axis increases/decreases size
-                        // We need original size to apply delta
-                        // But we only have dragStartPos (which is position). We need dragStartSize.
-                        // Let's store dragStartSize in MouseDown.
-
-                        // Simple scale: size += delta
-                        // But delta is in world units.
-
                         Vector3 sizeDelta = Vector3.Zero;
                         if (dragAxis == GizmoAxis.X) sizeDelta.X = delta.X;
                         if (dragAxis == GizmoAxis.Y) sizeDelta.Y = delta.Y;
                         if (dragAxis == GizmoAxis.Z) sizeDelta.Z = delta.Z;
 
-                        // Check direction of drag vs axis to ensure intuitive scaling (dragging right/up/forward increases)
-                        // This depends on where we are looking from, but usually +axis means +size.
-
                         Vector3 newSize = dragStartSize + sizeDelta;
-                        // Clamp to minimal size
+
+                        // minimal size
                         if (newSize.X < 0.1f) newSize.X = 0.1f;
                         if (newSize.Y < 0.1f) newSize.Y = 0.1f;
                         if (newSize.Z < 0.1f) newSize.Z = 0.1f;
@@ -770,7 +772,7 @@ namespace skystride.forms
 
             if (!isMouseLook)
             {
-                // Hover effect
+                // hover effect
                 if (selectedEntity != null && !isDraggingGizmo)
                 {
                     Ray ray = GetPickRay(e.X, e.Y);

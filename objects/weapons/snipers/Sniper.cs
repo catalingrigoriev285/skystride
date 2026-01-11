@@ -26,7 +26,7 @@ namespace skystride.objects.weapons.snipers
             this.rotation = new Vector3(0f, 0f, 0f);
             this.recoilForce = 10f;
             
-            // Item rotation (e.g. lie flat)
+            // item rotation
             this.ItemRotation = new Vector3(0f, 0f, 0f);
             this.ItemRotationSpeed = new Vector3(0f, 90f, 0f);
         }
@@ -45,7 +45,7 @@ namespace skystride.objects.weapons.snipers
         {
             if (!isScoped) return;
 
-            // Draw scope mask (black screen with hole)
+            // draw scope mask
             GL.Disable(EnableCap.Texture2D);
             GL.Disable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Blend);
@@ -62,8 +62,8 @@ namespace skystride.objects.weapons.snipers
 
             float centerX = width / 2f;
             float centerY = height / 2f;
-            float scopeRadius = height / 2.5f; // Adjust size of the hole
-            float outerRadius = width * 1.5f; // Large enough to cover screen corners
+            float scopeRadius = height / 2.5f; // size of the hole
+            float outerRadius = width * 1.5f;
 
             GL.Color4(0f, 0f, 0f, 1f);
             GL.Begin(PrimitiveType.QuadStrip);
@@ -83,7 +83,7 @@ namespace skystride.objects.weapons.snipers
 
             GL.End();
 
-            // Draw Crosshair
+            // Crosshair
             GL.Color4(0f, 0f, 0f, 1f); // Black crosshair
             GL.LineWidth(2f);
             GL.Begin(PrimitiveType.Lines);

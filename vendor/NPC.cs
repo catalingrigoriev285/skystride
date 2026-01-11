@@ -56,7 +56,7 @@ namespace skystride.vendor
             this.npcType = type;
             this.name = name;
             this.radius = size * 0.5f;
-            this.moveSpeed = 2.0f; // slower than player
+            this.moveSpeed = 2.0f;
             this.health = health;
             this.damagePerHit = damage;
 
@@ -125,7 +125,7 @@ namespace skystride.vendor
             {
                 Vector3 playerPos = player.position;
                 Vector3 toPlayer = playerPos - position;
-                toPlayer.Y = 0f; // keep movement horizontal
+                toPlayer.Y = 0f;
 
                 if (toPlayer.LengthSquared > 0f)
                 {
@@ -145,7 +145,7 @@ namespace skystride.vendor
             }
 
             Vector3 wishDir = direction;
-            wishDir.Y = 0f; // keep movement horizontal
+            wishDir.Y = 0f;
             if (wishDir.LengthSquared > 0f)
             {
                 wishDir.NormalizeFast();
@@ -186,7 +186,7 @@ namespace skystride.vendor
                     if (damageTimer == 0f || damageTimer >= damageCooldown)
                     {
                         player.TakeDamage(damagePerHit);
-                        damageTimer = 0.001f; // Set to small value to prevent immediate re-trigger
+                        damageTimer = 0.001f;
                     }
 
                     damageTimer += dt;
@@ -248,7 +248,7 @@ namespace skystride.vendor
             foreach (var c in colliders)
             {
                 if (c == null) continue;
-                if (c.Owner == this) continue; // Don't collide with self
+                if (c.Owner == this) continue; // don't collide with self
 
                 Vector3 npcMin = new Vector3(p.X - halfSize, p.Y - halfSize, p.Z - halfSize);
                 Vector3 npcMax = new Vector3(p.X + halfSize, p.Y + halfSize, p.Z + halfSize);

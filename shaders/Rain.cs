@@ -148,7 +148,7 @@ namespace skystride.shaders
             for (int i = 0; i < _particles.Length; i++)
             {
                 var p = _particles[i];
-                // Apply oblique direction
+                // oblique direction
                 p.Position += _fallDirection * p.Speed * dt;
                 float driftScale = 0.6f + (p.Speed - _minSpeed) / (_maxSpeed - _minSpeed + 0.0001f) * 0.8f;
                 p.Position.X += _windX * driftScale * dt;

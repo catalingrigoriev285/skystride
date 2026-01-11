@@ -35,11 +35,11 @@ namespace skystride.objects.templates
 
             for (int i = -1 * STEP * UNITS; i <= STEP * UNITS; i += STEP)
             {
-                // XZ parrallel with OZ axis
+                // XZ parrallel with OZ
                 GL.Vertex3(i + MICRO_OFFSET, 0, POINT_OFFSET);
                 GL.Vertex3(i + MICRO_OFFSET, 0, -1 * POINT_OFFSET);
 
-                // XZ parrallel with OX axis
+                // XZ parrallel with OX
                 GL.Vertex3(POINT_OFFSET, 0, i + MICRO_OFFSET);
                 GL.Vertex3(-1 * POINT_OFFSET, 0, i + MICRO_OFFSET);
             }

@@ -14,14 +14,14 @@ namespace skystride.scenes
     {
         public Engine _engine { get; set; }
 
-        // Unified list for all entities
+        // list for all entities
         protected readonly List<ISceneEntity> Entities = new List<ISceneEntity>();
         
-        // Global colliders accumulated automatically
+        // global colliders accumulated automatically
         protected readonly List<AABB> Colliders = new List<AABB>();
         protected readonly List<Bullet> Bullets = new List<Bullet>();
 
-        // Global draw distance
+        // global draw distance
         public static float DrawDistance =150f; // default draw distance
         internal static float DrawDistanceSquared { get { return DrawDistance * DrawDistance; } }
         internal static Vector3 CurrentCameraPos; // updated every frame in Update()
@@ -46,8 +46,6 @@ namespace skystride.scenes
             }
         }
 
-
-
         public List<ISceneEntity> GetEntities() { return Entities; }
 
         public void AddEntity(ISceneEntity entity, bool collidable = true)
@@ -67,7 +65,6 @@ namespace skystride.scenes
             var modelEnt = entity as ModelEntity;
             if (modelEnt != null)
             {
-                // Ensure model entities participate in collisions when loaded
                 modelEnt.AttachCollidersRef(Colliders);
                 return;
             }
@@ -160,12 +157,11 @@ namespace skystride.scenes
             }
         }
 
-        // Per-frame logic hook for scenes
+        // pPer-frame logic hook for scenes
         public virtual void OnLoad() { }
 
         public virtual void Update(float dt, Player player, Camera camera, KeyboardState currentKeyboard, KeyboardState previousKeyboard, MouseState currentMouse, MouseState previousMouse)
         {
-            // Update camera position reference for distance culling
             CurrentCameraPos = camera != null ? camera.position : Vector3.Zero;
 
             for (int i = 0; i < Entities.Count; i++)
@@ -187,7 +183,7 @@ namespace skystride.scenes
             }
 
             // Remove dead NPCs
-            // Iterate backwards to safely remove
+            // Iterating backwards for safely remove
             for (int i = Entities.Count - 1; i >= 0; i--)
             {
                 var npc = Entities[i] as NPC;
@@ -197,7 +193,6 @@ namespace skystride.scenes
                 }
             }
 
-            // Handle shooting only when input is enabled (window focused & console closed)
             if (player != null)
             {
                 if (Engine.InputEnabled)
@@ -207,7 +202,6 @@ namespace skystride.scenes
                     {
                         Bullets.Add(b);
                     }
-                    // After a focused frame, clear one-shot block if it was set but no click occurred
                     if (Engine.BlockShootOnce && !(currentMouse.LeftButton == ButtonState.Pressed && previousMouse.LeftButton == ButtonState.Released))
                     {
                         Engine.BlockShootOnce = false;
@@ -215,7 +209,7 @@ namespace skystride.scenes
                 }
                 else
                 {
-                    // keep previous mouse state sync to avoid stale edge when focus returns
+                    //
                 }
             }
 

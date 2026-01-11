@@ -44,7 +44,7 @@ namespace skystride.objects
 
         public void Render(Vector3 position)
         {
-            GL.Disable(EnableCap.DepthTest); // Always draw on top
+            GL.Disable(EnableCap.DepthTest); // always draw on top
             GL.Disable(EnableCap.Lighting);
             GL.PushMatrix();
             GL.Translate(position);
@@ -79,13 +79,13 @@ namespace skystride.objects
 
             GL.PushMatrix();
             
-            // Calculate rotation to align +Y to 'dir'
+            // rotation to align +Y to 'dir'
             Vector3 up = Vector3.UnitY;
             if (dir != up)
             {
                 Vector3 axis = Vector3.Cross(up, dir);
                 float angle = (float)MathHelper.RadiansToDegrees(Math.Acos(Vector3.Dot(up, dir)));
-                if (axis.LengthSquared < 0.001f) // Parallel but opposite
+                if (axis.LengthSquared < 0.001f) // parallel but opposite
                 {
                     if (Vector3.Dot(up, dir) < 0) axis = Vector3.UnitX;
                 }
@@ -99,7 +99,7 @@ namespace skystride.objects
                 // Arrowhead (Cone)
                 int segments = 16;
                 GL.Begin(PrimitiveType.TriangleFan);
-                GL.Vertex3(0, ArrowHeadLen, 0); // Tip
+                GL.Vertex3(0, ArrowHeadLen, 0);
                 for (int i = 0; i <= segments; i++)
                 {
                     float theta = (float)(i * 2 * Math.PI / segments);
@@ -136,19 +136,11 @@ namespace skystride.objects
                 GL.Vertex3(s, s, s); GL.Vertex3(s, s, -s); GL.Vertex3(s, 0, -s); GL.Vertex3(s, 0, s);
                 // Top
                 GL.Vertex3(-s, s + s, -s); GL.Vertex3(-s, s + s, s); GL.Vertex3(s, s + s, s); GL.Vertex3(s, s + s, -s); // Offset slightly up? No, just box at end
-                // Actually, let's just draw a cube centered at (0,0,0) relative to the end of the line
-                // But we translated to 'length' (end of line).
-                // Let's draw a cube from 0 to ScaleBoxSize*2 in Y? Or centered?
-                // Standard gizmo scale handles are cubes at the end.
-                // Let's center it at (0,0,0) (which is 'end' in world space)
-                
-                // Reset translation to draw centered box at tip
-                // Wait, we are at 'end'.
             }
             
             if (CurrentMode == GizmoMode.Scale)
             {
-                 // Draw Cube centered at 0,0,0 (which is the tip of the line)
+                 // Cube centered at 0,0,0
                  float s = ScaleBoxSize;
                  GL.Begin(PrimitiveType.Quads);
                  
@@ -173,12 +165,12 @@ namespace skystride.objects
 
         public GizmoAxis CheckIntersection(Ray ray, Vector3 position)
         {
-            // Transform ray to local space of the gizmo
+            // transform ray to local space of the gizmo
             Vector3 localOrigin = ray.Origin - position;
             
             // Check intersection with each axis box
             // X Axis Box: (0, -w, -w) to (L, w, w)
-            float w = AxisThickness * 2f; // Make it easier to click
+            float w = AxisThickness * 2f;
             float L = AxisLength + (CurrentMode == GizmoMode.Translate ? ArrowHeadLen : ScaleBoxSize);
 
             float tX = IntersectBox(localOrigin, ray.Direction, new Vector3(0, -w, -w), new Vector3(L, w, w));

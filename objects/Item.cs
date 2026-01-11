@@ -27,12 +27,12 @@ namespace skystride.objects
 
             _time += dt;
 
-            // Floating logic
+            // floating logic
             Vector3 pos = GetPosition();
             pos.Y = _initialY + (float)Math.Sin(_time * _floatSpeed) * _floatAmplitude;
             SetPosition(pos);
 
-            // Rotating logic
+            // rotating logic
             Vector3 currentRot = GetRotation();
             Vector3 newRot = currentRot + RotationSpeed * dt;
             SetRotation(newRot.X, newRot.Y, newRot.Z);

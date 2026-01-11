@@ -5,9 +5,6 @@ using System.Drawing;
 
 namespace skystride.vendor
 {
-    /// <summary>
-    /// Half-Life style loading screen with progress bar
-    /// </summary>
     internal class LoadingScreen
     {
         private float _progress = 0.0f;
@@ -42,7 +39,6 @@ namespace skystride.vendor
         {
             if (!_isVisible) return;
 
-            // Save current matrices
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             GL.LoadIdentity();
@@ -52,17 +48,15 @@ namespace skystride.vendor
             GL.PushMatrix();
             GL.LoadIdentity();
 
-            // Disable depth test and lighting for UI
             GL.Disable(EnableCap.DepthTest);
             GL.Disable(EnableCap.Lighting);
             GL.Disable(EnableCap.Texture2D);
 
-            // HL2 Style Colors
-            Color bgColor = Color.FromArgb(255, 40, 40, 40); // Dark Grey
-            Color amberColor = Color.FromArgb(255, 255, 176, 0); // HL2 Amber
-            Color darkAmber = Color.FromArgb(255, 74, 50, 0); // Darker Amber for empty bar
+            Color bgColor = Color.FromArgb(255, 40, 40, 40);
+            Color amberColor = Color.FromArgb(255, 255, 176, 0);
+            Color darkAmber = Color.FromArgb(255, 74, 50, 0);
 
-            // Draw background overlay
+            // background overlay
             GL.Begin(PrimitiveType.Quads);
             GL.Color4(bgColor);
             GL.Vertex2(0, 0);
@@ -79,14 +73,14 @@ namespace skystride.vendor
             int barX = centerX - barWidth / 2;
             int barY = centerY + 20;
 
-            // Draw loading text (Centered above bar)
+            // Draw loading text
             string text = _loadingText.ToUpper();
             float fontSize = 24f;
-            // Estimate text width for centering: approx 0.6 * fontSize per char
+
             int textWidth = (int)(text.Length * (fontSize * 0.6f)); 
             TextRenderer.RenderText(text, centerX - textWidth / 2, barY - 40, amberColor, windowWidth, windowHeight, fontSize);
 
-            // Draw progress bar background (Dark Amber)
+            // progress bar background
             GL.Begin(PrimitiveType.Quads);
             GL.Color4(darkAmber);
             GL.Vertex2(barX, barY);
@@ -95,7 +89,7 @@ namespace skystride.vendor
             GL.Vertex2(barX, barY + barHeight);
             GL.End();
 
-            // Draw filled progress bar (Bright Amber)
+            // filled progress bar
             int filledWidth = (int)(barWidth * _progress);
             if (filledWidth > 0)
             {
@@ -108,13 +102,11 @@ namespace skystride.vendor
                 GL.End();
             }
 
-            // Restore matrices
             GL.MatrixMode(MatrixMode.Projection);
             GL.PopMatrix();
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PopMatrix();
 
-            // Re-enable depth test
             GL.Enable(EnableCap.DepthTest);
         }
     }

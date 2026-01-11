@@ -11,10 +11,8 @@ namespace skystride.vendor
         private int _lastW = 0;
         private int _lastH = 0;
 
-        // Shared singleton to support static access
         private static readonly TextRenderer Shared = new TextRenderer();
 
-        // Static convenience to allow TextRenderer.RenderText(...)
         public static void RenderText(string text, float x, float y, Color color, int windowWidth, int windowHeight, float fontSize = 16f)
         {
             Shared.DrawTextInternal(text, x, y, color, windowWidth, windowHeight, "Consolas", fontSize);
@@ -29,12 +27,10 @@ namespace skystride.vendor
         {
             if (string.IsNullOrEmpty(text)) return;
 
-            // Create bitmap via GDI+
             using (var bmp = new Bitmap(1, 1))
             using (var g = Graphics.FromImage(bmp))
             using (var font = new Font(fontName, fontSize, FontStyle.Regular, GraphicsUnit.Pixel))
             {
-                // measure
                 var size = g.MeasureString(text, font);
                 int w = Math.Max(1, (int)Math.Ceiling(size.Width));
                 int h = Math.Max(1, (int)Math.Ceiling(size.Height));
@@ -52,7 +48,6 @@ namespace skystride.vendor
                     UploadTexture(realBmp, w, h);
                 }
 
-                // Set up2D orthographic projection
                 GL.MatrixMode(MatrixMode.Projection);
                 GL.PushMatrix();
                 GL.LoadIdentity();
@@ -61,7 +56,6 @@ namespace skystride.vendor
                 GL.PushMatrix();
                 GL.LoadIdentity();
 
-                // Save state
                 bool hadDepthTest = GL.IsEnabled(EnableCap.DepthTest);
                 bool hadFog = GL.IsEnabled(EnableCap.Fog);
 
@@ -70,8 +64,8 @@ namespace skystride.vendor
                 GL.Enable(EnableCap.Blend);
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Disable(EnableCap.DepthTest);
-                GL.DepthMask(false); // don't write to depth buffer for overlay
-                if (hadFog) GL.Disable(EnableCap.Fog); // avoid fogging text
+                GL.DepthMask(false);
+                if (hadFog) GL.Disable(EnableCap.Fog);
 
                 float fx0 = x;
                 float fy0 = y;
@@ -86,7 +80,6 @@ namespace skystride.vendor
                 GL.TexCoord2(0f, 1f); GL.Vertex2(fx0, fy1);
                 GL.End();
 
-                // Restore state
                 if (hadFog) GL.Enable(EnableCap.Fog);
                 GL.DepthMask(true);
                 if (hadDepthTest) GL.Enable(EnableCap.DepthTest); else GL.Disable(EnableCap.DepthTest);
@@ -104,7 +97,6 @@ namespace skystride.vendor
 
         private void UploadTexture(Bitmap bmp, int w, int h)
         {
-            // Delete previous texture
             if (_lastTexture != 0)
             {
                 try { GL.DeleteTexture(_lastTexture); } catch { }

@@ -10,7 +10,7 @@ namespace skystride.objects.templates
     {
         private Vector3 position;
         private float radius;
-        private float height; // vertical radius (Y axis)
+        private float height; // Y
         private Color color;
         private int slices; // longitudinal divisions
         private int stacks; // latitudinal divisions
@@ -23,13 +23,11 @@ namespace skystride.objects.templates
 
         public Sphere() : this(new Vector3(0f, 0.5f, 0f), 0.5f, Color.OrangeRed) { }
 
-        // Back-compat: height defaults to radius (perfect sphere)
         public Sphere(Vector3 position, float radius, Color color, int slices = 24, int stacks = 16)
             : this(position, radius, radius, color, slices, stacks)
         {
         }
 
-        // New overload allows specifying vertical radius (height)
         public Sphere(Vector3 position, float radius, float height, Color color, int slices = 24, int stacks = 16)
         {
             this.position = position;
@@ -60,9 +58,9 @@ namespace skystride.objects.templates
             GL.Color3(this.color);
 
             float dTheta = (float)(2.0 * Math.PI / this.slices);
-            float dPhi = (float)(Math.PI / this.stacks); // from -PI/2 to +PI/2
+            float dPhi = (float)(Math.PI / this.stacks); // -PI/2 to +PI/2
 
-            // phi from -PI/2 (south pole) to +PI/2 (north pole)
+            // phi from -PI/2 to +PI/2
             float phiStart = (float)(-0.5 * Math.PI);
 
             float rx = this.radius;
@@ -78,18 +76,18 @@ namespace skystride.objects.templates
                 {
                     float theta = j * dTheta;
 
-                    // First vertex on the current latitude (phi0)
+                    // first vertex on the current latitude (phi0)
                     float c0 = (float)Math.Cos(phi0);
                     float s0 = (float)Math.Sin(phi0);
                     float x0 = c0 * (float)Math.Cos(theta);
                     float y0 = s0;
                     float z0 = c0 * (float)Math.Sin(theta);
-                    // Vertex scaled as an ellipsoid with radii (rx, ry, rx)
+                    // vertex scaled as an ellipsoid with (rx, ry, rx)
                     Vector3 v0 = new Vector3(
                         this.position.X + x0 * rx,
                         this.position.Y + y0 * ry,
                         this.position.Z + z0 * rx);
-                    // Correct normal for an ellipsoid: normalize(x/rx, y/ry, z/rx)
+                    // normal for an ellipsoid: normalize(x/rx, y/ry, z/rx)
                     Vector3 n0 = new Vector3(
                         rx > 0f ? x0 / rx : x0,
                         ry > 0f ? y0 / ry : y0,
@@ -98,7 +96,7 @@ namespace skystride.objects.templates
                     GL.Normal3(n0);
                     GL.Vertex3(v0);
 
-                    // Second vertex on the next latitude (phi1)
+                    // second vertex on the next latitude (phi1)
                     float c1 = (float)Math.Cos(phi1);
                     float s1 = (float)Math.Sin(phi1);
                     float x1 = c1 * (float)Math.Cos(theta);
